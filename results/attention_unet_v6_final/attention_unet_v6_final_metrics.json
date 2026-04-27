@@ -1,0 +1,11 @@
+{
+  "experiment": "attention_unet_v6_final",
+  "timestamp": "2026-04-27 12:06:02",
+  "n_pixels": 2054019,
+  "tta": false,
+  "MAE": 0.5034,
+  "RMSE": 0.6678,
+  "R2": 0.1763,
+  "NSE": 0.1763,
+  "Bias": -0.2906
+}

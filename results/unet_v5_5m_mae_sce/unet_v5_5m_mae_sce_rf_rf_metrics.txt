@@ -1,0 +1,15 @@
+Random Forest - unet_v5_5m_mae_sce_rf
+========================================
+MAE: 0.4919
+RMSE: 0.6446
+R2: 0.2326
+NSE: 0.2326
+Bias: -0.1242
+
+Importancia de variables:
+  TPI: 0.4369
+  DEM: 0.2543
+  Slope: 0.1493
+  Northness: 0.0838
+  Eastness: 0.0610
+  SCE: 0.0148

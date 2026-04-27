@@ -1,0 +1,28 @@
+Random Forest v6 - attention_unet_v6_5m
+========================================
+Canales: ['DEM', 'Slope', 'Northness', 'Eastness', 'TPI', 'SCE', 'Sx_0', 'Sx_45', 'Sx_90', 'Sx_135', 'Sx_180', 'Sx_225', 'Sx_270', 'Sx_315', 'Pers_15d', 'Pers_30d', 'Pers_60d']
+
+MAE: 0.541
+RMSE: 0.691
+R2: 0.1182
+NSE: 0.1182
+Bias: -0.1043
+
+Importancia de variables:
+  Pers_15d: 0.2937
+  TPI: 0.2787
+  DEM: 0.1256
+  Slope: 0.0391
+  Sx_315: 0.0369
+  Sx_90: 0.0278
+  SCE: 0.0254
+  Sx_135: 0.0241
+  Sx_180: 0.0219
+  Sx_270: 0.0219
+  Northness: 0.0200
+  Sx_45: 0.0187
+  Sx_0: 0.0159
+  Eastness: 0.0156
+  Sx_225: 0.0133
+  Pers_30d: 0.0125
+  Pers_60d: 0.0091

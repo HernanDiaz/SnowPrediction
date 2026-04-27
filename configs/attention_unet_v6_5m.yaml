@@ -1,0 +1,38 @@
+experiment:
+  name: attention_unet_v6_5m
+
+data:
+  root: "E:/PycharmProjects/SnowPrediction/Articulo 1/Data/processed/dataset_v6_5m"
+  csv_file: "dataset_v6_fisico.csv"
+  images_dir: "images"
+  masks_dir: "masks"
+  source: "lidar"
+  split_type: "temporal"
+  use_sce: false       # SCE ya incluido como canal 5 en el .npy
+  augmentation: false
+  # v6: canales utiles [0-13] (topo+SCE+Sx) + [30-32] (persistencia)
+  # Los canales 14-29 son ceros vacios y se omiten
+  channel_indices: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,30,31,32]
+
+model:
+  architecture: "attention_unet"
+  in_channels: 17      # 6 topo+SCE + 8 Sx_100m + 3 persistencia
+  out_channels: 1
+  features: [48, 96, 192, 384]
+  dropout_p: 0.10
+
+training:
+  batch_size: 16
+  learning_rate: 0.00039
+  epochs: 150
+  loss: "mse"
+  weight_decay: 0.000016
+  optimizer: "adam"
+  grad_clip: 0.0
+  num_workers: 0
+  device: "auto"
+
+output:
+  models_dir: "E:/PycharmProjects/SnowPrediction/Articulo 1/Models"
+  results_dir: "E:/PycharmProjects/SnowPrediction/results/attention_unet_v6_5m"
+  model_name: "attention_unet_v6_5m"

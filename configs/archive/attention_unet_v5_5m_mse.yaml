@@ -1,0 +1,31 @@
+experiment:
+  name: attention_unet_v5_5m_mse
+
+data:
+  root: "E:/PycharmProjects/SnowPrediction/Articulo 1/Data/processed/dataset_v5_5m"
+  csv_file: "dataset_v4_fisico.csv"
+  images_dir: "images"
+  masks_dir: "masks"
+  source: "lidar"
+  split_type: "temporal"
+  use_sce: false
+  augmentation: false
+
+model:
+  architecture: "attention_unet"  # Attention U-Net (Oktay et al. 2018)
+  in_channels: 5
+  out_channels: 1
+  # features: [64, 128, 256, 512] # se usa por defecto
+
+training:
+  batch_size: 8
+  learning_rate: 0.0001
+  epochs: 150
+  loss: "mse"
+  num_workers: 0
+  device: "auto"
+
+output:
+  models_dir: "E:/PycharmProjects/SnowPrediction/Articulo 1/Models"
+  results_dir: "E:/PycharmProjects/SnowPrediction/results/attention_unet_v5_5m_mse"
+  model_name: "attention_unet_v5_5m_mse"

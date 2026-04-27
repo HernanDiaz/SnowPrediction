@@ -1,0 +1,29 @@
+experiment:
+  name: unet_v5_5m_mse_sce
+
+data:
+  root: "E:/PycharmProjects/SnowPrediction/Articulo 1/Data/processed/dataset_v5_5m"
+  csv_file: "dataset_v4_fisico.csv"
+  images_dir: "images"
+  masks_dir: "masks"
+  source: "lidar"
+  split_type: "temporal"
+  use_sce: true          # <-- Canal 6 activado (imagen satelite SCE)
+
+model:
+  architecture: "unet"
+  in_channels: 6         # <-- 5 topograficos + 1 SCE
+  out_channels: 1
+
+training:
+  batch_size: 8
+  learning_rate: 0.0001
+  epochs: 150
+  loss: "mse"
+  num_workers: 0
+  device: "auto"
+
+output:
+  models_dir: "E:/PycharmProjects/SnowPrediction/Articulo 1/Models"
+  results_dir: "E:/PycharmProjects/SnowPrediction/results/unet_v5_5m_mse_sce"
+  model_name: "unet_v5_5m_mse_sce"

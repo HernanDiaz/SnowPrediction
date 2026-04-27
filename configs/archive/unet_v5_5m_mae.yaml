@@ -1,0 +1,29 @@
+experiment:
+  name: unet_v5_5m_mae
+
+data:
+  root: "E:/PycharmProjects/SnowPrediction/Articulo 1/Data/processed/dataset_v5_5m"
+  csv_file: "dataset_v4_fisico.csv"
+  images_dir: "images"
+  masks_dir: "masks"
+  source: "lidar"        # lidar | pleiades | grass | all
+  split_type: "temporal" # temporal | spatial
+  use_sce: false         # false = 5 canales topograficos | true = +canal satelite SCE
+
+model:
+  architecture: "unet"   # unet | attention_unet (proximas versiones)
+  in_channels: 5         # 5 sin SCE, 6 con SCE
+  out_channels: 1
+
+training:
+  batch_size: 8
+  learning_rate: 0.0001
+  epochs: 150
+  loss: "mae"            # mae | mse
+  num_workers: 0
+  device: "auto"         # auto | cpu | cuda
+
+output:
+  models_dir: "E:/PycharmProjects/SnowPrediction/Articulo 1/Models"
+  results_dir: "E:/PycharmProjects/SnowPrediction/results/unet_v5_5m_mae"
+  model_name: "e3_b03_1_best_unet_lidar_5m"

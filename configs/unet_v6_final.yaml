@@ -1,0 +1,40 @@
+experiment:
+  name: unet_v6_final
+
+data:
+  root: "E:/PycharmProjects/SnowPrediction/Articulo 1/Data/processed/dataset_v6_5m"
+  csv_file: "dataset_v6_fisico.csv"
+  images_dir: "images"
+  masks_dir: "masks"
+  source: "lidar"
+  split_type: "temporal"
+  use_sce: false
+  augmentation: false
+  # v6: canales utiles [0-13] (topo+SCE+Sx) + [30-32] (persistencia)
+  channel_indices: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,30,31,32]
+
+model:
+  architecture: "unet"
+  in_channels: 17       # 6 topo+SCE + 8 Sx_100m + 3 persistencia
+  out_channels: 1
+  features: [64, 128, 256, 512]   # base_channels=64 (mejor Optuna trial #5)
+  dropout_p: 0.155
+
+training:
+  batch_size: 16
+  learning_rate: 0.000422
+  epochs: 200
+  loss: "mse"
+  weight_decay: 0.000363
+  optimizer: "adamw"
+  grad_clip: 1.0
+  scheduler: "cosine"
+  lr_min: 1.0e-6
+  early_stopping: true
+  num_workers: 0
+  device: "auto"
+
+output:
+  models_dir: "E:/PycharmProjects/SnowPrediction/Articulo 1/Models"
+  results_dir: "E:/PycharmProjects/SnowPrediction/results/unet_v6_final"
+  model_name: "unet_v6_final"

@@ -1,0 +1,31 @@
+experiment:
+  name: unet_v5_5m_mse_wd1e3
+
+data:
+  root: "E:/PycharmProjects/SnowPrediction/Articulo 1/Data/processed/dataset_v5_5m"
+  csv_file: "dataset_v4_fisico.csv"
+  images_dir: "images"
+  masks_dir: "masks"
+  source: "lidar"
+  split_type: "temporal"
+  use_sce: false
+  augmentation: false
+
+model:
+  architecture: "unet"
+  in_channels: 5
+  out_channels: 1
+
+training:
+  batch_size: 8
+  learning_rate: 0.0001
+  epochs: 150
+  loss: "mse"
+  num_workers: 0
+  device: "auto"
+  weight_decay: 0.001   # 10x mayor -> exploracion de underfitting
+
+output:
+  models_dir: "E:/PycharmProjects/SnowPrediction/Articulo 1/Models"
+  results_dir: "E:/PycharmProjects/SnowPrediction/results/unet_v5_5m_mse_wd1e3"
+  model_name: "unet_v5_5m_mse_wd1e3"

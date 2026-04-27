@@ -1,0 +1,36 @@
+experiment:
+  name: unet_v5_5m_mse_adamw_cosinewr
+
+data:
+  root: "E:/PycharmProjects/SnowPrediction/Articulo 1/Data/processed/dataset_v5_5m"
+  csv_file: "dataset_v4_fisico.csv"
+  images_dir: "images"
+  masks_dir: "masks"
+  source: "lidar"
+  split_type: "temporal"
+  use_sce: false
+  augmentation: false
+
+model:
+  architecture: "unet"
+  in_channels: 5
+  out_channels: 1
+
+training:
+  batch_size: 8
+  learning_rate: 0.0001
+  epochs: 150
+  loss: "mse"
+  num_workers: 0
+  device: "auto"
+  weight_decay: 0.0001
+  optimizer: "adamw"           # AdamW: weight decay desacoplado
+  lr_scheduler: "cosine_wr"   # CosineAnnealingWarmRestarts: 3 ciclos de 50 epocas
+  lr_min: 0.000001
+  cosine_T0: 50               # Cada 50 epocas se reinicia el LR (3 reinicios en 150 ep)
+  cosine_T_mult: 1
+
+output:
+  models_dir: "E:/PycharmProjects/SnowPrediction/Articulo 1/Models"
+  results_dir: "E:/PycharmProjects/SnowPrediction/results/unet_v5_5m_mse_adamw_cosinewr"
+  model_name: "unet_v5_5m_mse_adamw_cosinewr"
