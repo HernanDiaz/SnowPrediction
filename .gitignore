@@ -8,8 +8,10 @@ env/
 # ============================================================
 # Datos y modelos (ficheros grandes — no van al repo)
 # ============================================================
-Articulo 1/Data/
-Articulo 1/Models/
+# Toda la carpeta Articulo 1/ contiene datos raw (.tif, .npy),
+# datasets procesados y pesos de modelos (.pth). Nada de esto
+# va al repo. El codigo para generarlos esta en data/ y scripts/
+Articulo 1/
 
 # ============================================================
 # Resultados generados (se pueden regenerar)
@@ -60,3 +62,15 @@ desktop.ini
 *.log
 *.tmp
 *.bak
+
+# ============================================================
+# Ficheros de datos grandes (red de seguridad)
+# ============================================================
+*.tif
+*.tiff
+*.npy
+*.npz
+*.pth
+*.joblib
+*.h5
+*.hdf5
