@@ -47,6 +47,7 @@ def run_step(label, cmd, log_path):
             text=True,
             encoding="utf-8",
             errors="replace",
+            env={**__import__("os").environ, "PYTHONUNBUFFERED": "1"},
         )
         for line in proc.stdout:
             print(line, end="")

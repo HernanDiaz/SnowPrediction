@@ -1,0 +1,11 @@
+{
+  "experiment": "unet_v6_topo5_only",
+  "timestamp": "2026-04-28 08:18:45",
+  "n_pixels": 2054019,
+  "tta": false,
+  "MAE": 0.5527,
+  "RMSE": 0.7289,
+  "R2": 0.0188,
+  "NSE": 0.0188,
+  "Bias": -0.3751
+}

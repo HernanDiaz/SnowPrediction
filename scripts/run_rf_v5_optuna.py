@@ -54,12 +54,13 @@ if __name__ == "__main__":
     with open(LOG, "a", encoding="utf-8") as logf:
         logf.write(f"\n{'='*60}\nOptuna RF v5\n{'='*60}\n")
         proc = subprocess.Popen(
-            [str(PYTHON), str(SCRIPT)],
+            [str(PYTHON), "-u", str(SCRIPT)],  # -u: unbuffered output
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
             encoding="utf-8",
             errors="replace",
+            env={**__import__("os").environ, "PYTHONUNBUFFERED": "1"},
             cwd=str(ROOT),
         )
         for line in proc.stdout:

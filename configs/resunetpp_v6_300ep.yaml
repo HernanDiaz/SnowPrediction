@@ -1,0 +1,47 @@
+experiment:
+  name: resunetpp_v6_300ep
+
+# Igual que resunetpp_v6_5m (mejor resultado quick: R2=0.2495) pero:
+#   - 300 epochs (vs 150) para mejor convergencia
+#   - Cosine scheduler con decaimiento suave
+#   - Augmentation activado
+#   Objetivo: superar R2=0.25 sin overfitting al val set
+
+data:
+  root: "E:/PycharmProjects/SnowPrediction/Articulo 1/Data/processed/dataset_v6_5m"
+  csv_file: "dataset_v6_fisico.csv"
+  images_dir: "images"
+  masks_dir: "masks"
+  source: "lidar"
+  split_type: "temporal"
+  use_sce: false
+  augmentation: true          # activado para mas diversidad
+  augmentation_mode: "h"      # solo flip horizontal (conserva asimetria N-S)
+  channel_indices: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,30,31,32]
+
+model:
+  architecture: "resunetpp"
+  in_channels: 17
+  out_channels: 1
+  features: [48, 96, 192, 384]    # mismas features que quick (mejor trial)
+  dropout_p: 0.1
+  num_groups: 8
+
+training:
+  batch_size: 8
+  learning_rate: 0.00039          # mismo LR que quick
+  epochs: 300                     # extendido de 150 a 300
+  loss: "mse"
+  weight_decay: 1.6e-05
+  optimizer: "adam"
+  grad_clip: 0.0
+  scheduler: "cosine"             # nuevo: decaimiento suave
+  lr_min: 1.0e-6
+  early_stopping: true
+  num_workers: 0
+  device: "auto"
+
+output:
+  models_dir: "E:/PycharmProjects/SnowPrediction/Articulo 1/Models"
+  results_dir: "E:/PycharmProjects/SnowPrediction/results/resunetpp_v6_300ep"
+  model_name: "resunetpp_v6_300ep"

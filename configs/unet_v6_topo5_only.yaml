@@ -1,0 +1,45 @@
+experiment:
+  name: unet_v6_topo5_only
+
+# Comparacion directa de resolucion: mismos 5 canales topograficos en dataset 5m
+# UNet v4 (1m, 5 topo, 3134 tiles) vs este experimento (5m, 5 topo, ~60 tiles)
+# Diferencia: resolucion espacial y tamano de contexto (256m vs 640m)
+
+data:
+  root: "E:/PycharmProjects/SnowPrediction/Articulo 1/Data/processed/dataset_v6_5m"
+  csv_file: "dataset_v6_fisico.csv"
+  images_dir: "images"
+  masks_dir: "masks"
+  source: "lidar"
+  split_type: "temporal"
+  use_sce: false
+  augmentation: true
+  augmentation_mode: "h"
+  # Solo 5 canales topograficos (mismos que UNet v4_1m_topo5)
+  channel_indices: [0, 1, 2, 3, 4]
+
+model:
+  architecture: "unet"
+  in_channels: 5
+  out_channels: 1
+  features: [64, 128, 256, 512]
+  dropout_p: 0.1
+
+training:
+  batch_size: 16
+  learning_rate: 0.001
+  epochs: 200
+  loss: "mse"
+  weight_decay: 0.0001
+  optimizer: "adamw"
+  grad_clip: 1.0
+  scheduler: "cosine"
+  lr_min: 1.0e-6
+  early_stopping: true
+  num_workers: 0
+  device: "auto"
+
+output:
+  models_dir: "E:/PycharmProjects/SnowPrediction/Articulo 1/Models"
+  results_dir: "E:/PycharmProjects/SnowPrediction/results/unet_v6_topo5_only"
+  model_name: "unet_v6_topo5_only"

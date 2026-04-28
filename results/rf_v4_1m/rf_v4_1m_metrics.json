@@ -1,0 +1,39 @@
+{
+  "experiment": "rf_v4_1m",
+  "dataset": "dataset_v4_fisico (1m)",
+  "channels": [
+    "DEM",
+    "Slope",
+    "Northness",
+    "Eastness",
+    "TPI"
+  ],
+  "n_train_tiles": 3134,
+  "n_train_pixels_used": 2000000,
+  "rf_params": {
+    "n_estimators": 500,
+    "max_depth": 20,
+    "max_features": 0.3
+  },
+  "val_metrics": {
+    "MAE": 0.3733,
+    "RMSE": 0.4672,
+    "R2": 0.2865,
+    "NSE": 0.2865,
+    "Bias": 0.1501
+  },
+  "test_metrics": {
+    "MAE": 0.5271,
+    "RMSE": 0.6736,
+    "R2": 0.2265,
+    "NSE": 0.2265,
+    "Bias": -0.0505
+  },
+  "feature_importance": {
+    "DEM": 0.2702,
+    "Slope": 0.0997,
+    "Northness": 0.0918,
+    "Eastness": 0.0633,
+    "TPI": 0.4752
+  }
+}

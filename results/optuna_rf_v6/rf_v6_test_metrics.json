@@ -1,0 +1,38 @@
+{
+  "experiment": "rf_v6_optuna",
+  "best_trial": 90,
+  "val_R2": 0.1962,
+  "best_params": {
+    "n_estimators": 300,
+    "max_depth": 15,
+    "min_samples_leaf": 1,
+    "max_features": "log2",
+    "min_samples_split": 2
+  },
+  "test_metrics": {
+    "MAE": 0.5183,
+    "RMSE": 0.6475,
+    "R2": 0.2257,
+    "NSE": 0.2257,
+    "Bias": -0.2812
+  },
+  "feature_importance": {
+    "DEM": 0.1557,
+    "Slope": 0.0426,
+    "Northness": 0.0275,
+    "Eastness": 0.0176,
+    "TPI": 0.2107,
+    "SCE": 0.0102,
+    "Sx_0": 0.0167,
+    "Sx_45": 0.0193,
+    "Sx_90": 0.0294,
+    "Sx_135": 0.0373,
+    "Sx_180": 0.0355,
+    "Sx_225": 0.032,
+    "Sx_270": 0.0292,
+    "Sx_315": 0.0248,
+    "Pers_15d": 0.1285,
+    "Pers_30d": 0.0826,
+    "Pers_60d": 0.1003
+  }
+}

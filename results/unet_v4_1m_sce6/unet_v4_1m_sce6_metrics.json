@@ -1,0 +1,11 @@
+{
+  "experiment": "unet_v4_1m_sce6",
+  "timestamp": "2026-04-28 07:53:03",
+  "n_pixels": 131481352,
+  "tta": false,
+  "MAE": 0.547,
+  "RMSE": 0.7219,
+  "R2": 0.0598,
+  "NSE": 0.0598,
+  "Bias": -0.2319
+}

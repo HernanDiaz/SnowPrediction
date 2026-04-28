@@ -1,0 +1,26 @@
+{
+  "experiment": "rf_v5_optuna",
+  "best_trial": 24,
+  "val_R2": 0.2944,
+  "best_params": {
+    "n_estimators": 500,
+    "max_depth": 20,
+    "min_samples_leaf": 1,
+    "max_features": "0.3",
+    "min_samples_split": 5
+  },
+  "test_metrics": {
+    "MAE": 0.496,
+    "RMSE": 0.6349,
+    "R2": 0.2555,
+    "NSE": 0.2555,
+    "Bias": -0.2522
+  },
+  "feature_importance": {
+    "DEM": 0.2878,
+    "Slope": 0.1378,
+    "Northness": 0.0859,
+    "Eastness": 0.0759,
+    "TPI": 0.4126
+  }
+}
