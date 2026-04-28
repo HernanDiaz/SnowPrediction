@@ -120,7 +120,3 @@ Este script espera a que los experimentos v4 terminen antes de lanzar los siguie
 Todos los paths en configs y scripts son **relativos a la raiz del repositorio**.
 `main.py` los resuelve automaticamente usando `Path(__file__).resolve().parent`.
 No es necesario editar nada al clonar en una ruta distinta.
-
-## Autores
-
-- Herdi — Universidad de Zaragoza
