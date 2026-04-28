@@ -2,7 +2,7 @@ experiment:
   name: unet_v4_1m_sce6
 
 data:
-  root: "E:/PycharmProjects/SnowPrediction/dataset_v4_fisico"
+  root: "dataset_v4_fisico"
   csv_file: "dataset_v4_fisico.csv"
   images_dir: "images"
   masks_dir: "masks"
@@ -35,6 +35,6 @@ training:
   device: "auto"
 
 output:
-  models_dir: "E:/PycharmProjects/SnowPrediction/Articulo 1/Models"
-  results_dir: "E:/PycharmProjects/SnowPrediction/results/unet_v4_1m_sce6"
+  models_dir: "Articulo 1/Models"
+  results_dir: "results/unet_v4_1m_sce6"
   model_name: "unet_v4_1m_sce6"

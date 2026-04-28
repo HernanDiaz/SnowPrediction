@@ -19,12 +19,22 @@ Uso:
 
 import argparse
 import os
+from pathlib import Path
 import yaml
 import torch
 import pandas as pd
 from torch.utils.data import DataLoader
 
 from data.dataset import SnowDataset, SnowDatasetEval, load_splits
+
+# Raiz del repositorio (directorio donde vive este archivo)
+REPO_ROOT = Path(__file__).resolve().parent
+
+
+def _resolve(path: str) -> Path:
+    """Resuelve paths relativos desde la raiz del repositorio."""
+    p = Path(path)
+    return p if p.is_absolute() else REPO_ROOT / p
 from models.unet import build_model
 from training.train import train_model, get_device
 from training.evaluate import evaluate_model, run_naive_benchmark
@@ -179,6 +189,11 @@ def main():
     )
     args   = parser.parse_args()
     config = load_config(args.config)
+
+    # Resolver rutas relativas contra la raiz del repositorio
+    config['data']['root']          = str(_resolve(config['data']['root']))
+    config['output']['models_dir']  = str(_resolve(config['output']['models_dir']))
+    config['output']['results_dir'] = str(_resolve(config['output']['results_dir']))
 
     print("\n" + "=" * 60)
     print(f"  Experimento : {config['experiment']['name']}")

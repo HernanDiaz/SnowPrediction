@@ -29,7 +29,7 @@ from datetime import datetime
 # ---------------------------------------------------------------------------
 # Configuracion
 # ---------------------------------------------------------------------------
-ROOT       = Path("E:/PycharmProjects/SnowPrediction")
+ROOT       = Path(__file__).resolve().parent.parent
 PYTHON     = ROOT / ".venv/Scripts/python.exe"
 SCRIPTS    = ROOT / "scripts"
 MASTER_LOG = ROOT / "results/run_all_log.txt"

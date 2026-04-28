@@ -26,7 +26,7 @@ import optuna
 from optuna.pruners import MedianPruner
 from optuna.samplers import TPESampler
 
-PROJECT_ROOT = 'E:/PycharmProjects/SnowPrediction'
+PROJECT_ROOT = str(__import__('pathlib').Path(__file__).resolve().parent.parent.parent)
 sys.path.insert(0, PROJECT_ROOT)
 
 from data.dataset import SnowDataset, SnowDatasetEval, load_splits
@@ -35,12 +35,12 @@ from training.train import get_device
 from utils.metrics import compute_metrics
 
 # -- Configuracion -------------------------------------------------------------
-DATA_ROOT   = 'E:/PycharmProjects/SnowPrediction/Articulo 1/Data/processed/dataset_v5_5m'
+DATA_ROOT   = str(__import__('pathlib').Path(PROJECT_ROOT) / 'Articulo 1/Data/processed/dataset_v5_5m')
 CSV_FILE    = os.path.join(DATA_ROOT, 'dataset_v4_fisico.csv')
 IMGS_DIR    = os.path.join(DATA_ROOT, 'images')
 MASKS_DIR   = os.path.join(DATA_ROOT, 'masks')
-MODELS_DIR  = 'E:/PycharmProjects/SnowPrediction/Articulo 1/Models/optuna_resunetpp'
-RESULTS_DIR = 'E:/PycharmProjects/SnowPrediction/results/optuna_resunetpp'
+MODELS_DIR  = str(__import__('pathlib').Path(PROJECT_ROOT) / 'Articulo 1/Models/optuna_resunetpp')
+RESULTS_DIR = str(__import__('pathlib').Path(PROJECT_ROOT) / 'results/optuna_resunetpp')
 DB_PATH     = f'sqlite:///{RESULTS_DIR}/optuna_resunetpp_5m.db'
 STUDY_NAME  = 'resunetpp_5m_hpo_v1'
 

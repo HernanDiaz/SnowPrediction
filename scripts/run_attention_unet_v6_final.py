@@ -21,7 +21,7 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 # Rutas
 # ---------------------------------------------------------------------------
-ROOT   = Path("E:/PycharmProjects/SnowPrediction")
+ROOT   = Path(__file__).resolve().parent.parent
 PYTHON = ROOT / ".venv/Scripts/python.exe"
 MAIN   = ROOT / "main.py"
 CONFIG = ROOT / "configs/attention_unet_v6_final.yaml"

@@ -2,7 +2,7 @@ experiment:
   name: resunetpp_v6_final
 
 data:
-  root: "E:/PycharmProjects/SnowPrediction/Articulo 1/Data/processed/dataset_v6_5m"
+  root: "Articulo 1/Data/processed/dataset_v6_5m"
   csv_file: "dataset_v6_fisico.csv"
   images_dir: "images"
   masks_dir: "masks"
@@ -37,6 +37,6 @@ training:
   device: "auto"
 
 output:
-  models_dir: "E:/PycharmProjects/SnowPrediction/Articulo 1/Models"
-  results_dir: "E:/PycharmProjects/SnowPrediction/results/resunetpp_v6_final"
+  models_dir: "Articulo 1/Models"
+  results_dir: "results/resunetpp_v6_final"
   model_name: "resunetpp_v6_final"

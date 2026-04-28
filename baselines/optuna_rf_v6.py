@@ -33,18 +33,19 @@ import optuna
 from optuna.samplers import TPESampler
 from sklearn.ensemble import RandomForestRegressor
 
-sys.path.insert(0, 'E:/PycharmProjects/SnowPrediction')
+sys.path.insert(0, str(__import__('pathlib').Path(__file__).resolve().parent.parent))
 from data.dataset import load_splits
 from utils.metrics import compute_metrics
 
 # ---------------------------------------------------------------------------
 # Configuracion fija
 # ---------------------------------------------------------------------------
-DATA_ROOT   = 'E:/PycharmProjects/SnowPrediction/Articulo 1/Data/processed/dataset_v6_5m'
+_REPO       = __import__('pathlib').Path(__file__).resolve().parent.parent
+DATA_ROOT   = str(_REPO / 'Articulo 1/Data/processed/dataset_v6_5m')
 CSV_FILE    = os.path.join(DATA_ROOT, 'dataset_v6_fisico.csv')
 IMGS_DIR    = os.path.join(DATA_ROOT, 'images')
 MASKS_DIR   = os.path.join(DATA_ROOT, 'masks')
-RESULTS_DIR = 'E:/PycharmProjects/SnowPrediction/results/optuna_rf_v6'
+RESULTS_DIR = str(_REPO / 'results/optuna_rf_v6')
 DB_PATH     = f'sqlite:///{RESULTS_DIR}/optuna_rf_v6.db'
 STUDY_NAME  = 'rf_v6_hpo_v1'
 N_TRIALS    = 80

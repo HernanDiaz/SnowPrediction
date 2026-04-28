@@ -22,7 +22,7 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 # Rutas
 # ---------------------------------------------------------------------------
-ROOT   = Path("E:/PycharmProjects/SnowPrediction")
+ROOT   = Path(__file__).resolve().parent.parent
 PYTHON = ROOT / ".venv/Scripts/python.exe"
 SCRIPT = ROOT / "baselines/optuna_rf_v6.py"
 LOG    = ROOT / "results/optuna_rf_v6/run_log.txt"

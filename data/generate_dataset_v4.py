@@ -28,7 +28,7 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
-ROOT          = Path("E:/PycharmProjects/SnowPrediction/dataset_v4_fisico")
+ROOT          = Path(__file__).resolve().parent.parent / "dataset_v4_fisico"
 MIN_VALID_FRAC = 0.30   # Descartar tiles con < 30% de pixeles validos
 
 TRAIN_YEARS = {"2021", "2022"}

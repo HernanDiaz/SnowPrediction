@@ -21,7 +21,7 @@ import sys
 import time
 from pathlib import Path
 
-ROOT   = Path("E:/PycharmProjects/SnowPrediction")
+ROOT   = Path(__file__).resolve().parent.parent
 PYTHON = ROOT / ".venv/Scripts/python.exe"
 MAIN   = ROOT / "main.py"
 LOG    = ROOT / "results/unet_v4_1m/run_log.txt"

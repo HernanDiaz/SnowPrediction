@@ -27,8 +27,9 @@ import joblib
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
-ROOT_DATA = Path("E:/PycharmProjects/SnowPrediction/dataset_v4_fisico")
-ROOT_OUT  = Path("E:/PycharmProjects/SnowPrediction/results/rf_v4_1m")
+_REPO     = Path(__file__).resolve().parent.parent
+ROOT_DATA = _REPO / "dataset_v4_fisico"
+ROOT_OUT  = _REPO / "results/rf_v4_1m"
 ROOT_OUT.mkdir(parents=True, exist_ok=True)
 
 CSV = ROOT_DATA / "dataset_v4_fisico.csv"
