@@ -1,0 +1,49 @@
+experiment:
+  name: resunetpp_v4_17ch
+
+# ResUNet++ a 1m de resolucion con los 17 canales completos.
+# Replica exactamente la configuracion del mejor modelo v6 (resunetpp_v6_300ep)
+# pero usando el dataset a 1m. Permite comparacion directa:
+#   resunetpp_v6_300ep  (5m, 17ch, R2=0.271) vs
+#   resunetpp_v4_17ch   (1m, 17ch, ???)       -> efecto puro de la resolucion.
+#
+# Dataset : dataset_v4_17ch (4892 tiles LiDAR a 1m)
+# Split   : train=2021-2023 (4241), val=2024 (431), test=2025 (220)
+
+data:
+  root: "dataset_v4_17ch"
+  csv_file: "dataset_v4_17ch.csv"
+  images_dir: "images"
+  masks_dir: "masks"
+  source: "lidar"
+  split_type: "temporal"
+  use_sce: false
+  augmentation: true
+  augmentation_mode: "h"   # igual que resunetpp_v6_300ep
+
+model:
+  architecture: "resunetpp"
+  in_channels: 17
+  out_channels: 1
+  features: [48, 96, 192, 384]   # mismo que resunetpp_v6_300ep
+  dropout_p: 0.1
+  num_groups: 8
+
+training:
+  batch_size: 8
+  learning_rate: 0.00039          # mismo que resunetpp_v6_300ep
+  epochs: 300
+  loss: "mse"
+  weight_decay: 1.6e-05
+  optimizer: "adam"
+  grad_clip: 0.0
+  scheduler: "cosine"
+  lr_min: 1.0e-6
+  early_stopping: true
+  num_workers: 0
+  device: "auto"
+
+output:
+  models_dir: "Articulo 1/Models"
+  results_dir: "results/resunetpp_v4_17ch"
+  model_name: "resunetpp_v4_17ch"

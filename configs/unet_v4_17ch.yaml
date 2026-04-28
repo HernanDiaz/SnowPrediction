@@ -1,0 +1,48 @@
+experiment:
+  name: unet_v4_17ch
+
+# UNet a 1m de resolucion con los 17 canales completos (mismo conjunto de features que v6).
+# Objetivo: aislar el efecto de la resolucion (1m vs 5m) manteniendo los mismos canales.
+#
+# Dataset : dataset_v4_17ch (4892 tiles LiDAR a 1m)
+# Split   : train=2021-2023 (4241), val=2024 (431), test=2025 (220)
+# Canales : DEM, Slope, Northness, Eastness, TPI, SCE +
+#           Sx_100m x8 + Persistencia (15d, 30d, 60d)
+
+data:
+  root: "dataset_v4_17ch"
+  csv_file: "dataset_v4_17ch.csv"
+  images_dir: "images"
+  masks_dir: "masks"
+  source: "lidar"
+  split_type: "temporal"
+  use_sce: false          # SCE incluido como canal 5, no como flag especial
+  augmentation: true
+  augmentation_mode: "h"  # solo flip horizontal (conserva asimetria N-S)
+  # Los 17 canales consecutivos [0..16] — no hace falta channel_indices
+
+model:
+  architecture: "unet"
+  in_channels: 17
+  out_channels: 1
+  features: [64, 128, 256, 512]
+  dropout_p: 0.1
+
+training:
+  batch_size: 8
+  learning_rate: 0.001
+  epochs: 150
+  loss: "mse"
+  weight_decay: 0.0001
+  optimizer: "adamw"
+  grad_clip: 1.0
+  scheduler: "cosine"
+  lr_min: 1.0e-6
+  early_stopping: true
+  num_workers: 0
+  device: "auto"
+
+output:
+  models_dir: "Articulo 1/Models"
+  results_dir: "results/unet_v4_17ch"
+  model_name: "unet_v4_17ch"
