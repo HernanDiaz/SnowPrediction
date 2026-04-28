@@ -46,11 +46,11 @@ pip install numpy pandas scikit-learn tqdm matplotlib pyyaml optuna joblib
 
 | Dataset   | Resolution | Spatial context | Split (train/val/test) | Channels       |
 |-----------|-----------|-----------------|------------------------|----------------|
-| v4_fisico | 1 m       | 256 m × 256 m   | 3134 / 1107 / 2575     | 6              |
+| v4_fisico | 1 m       | 256 m × 256 m   | 4241 / 1725 / 850      | 6              |
 | v5_5m     | 5 m       | 640 m × 640 m   | ~60 / ~23 / ~44        | 5              |
 | v6_5m     | 5 m       | 640 m × 640 m   | ~60 / ~23 / ~44        | 33 → 17 useful |
 
-Temporal split: train=2021–2022, val=2023, test=2024–2025.
+Temporal split: train=2021–2023, val=2024, test=2025.
 
 Channel groups (v6): DEM, Slope, Northness, Eastness, TPI, SCE + Sx_100m ×8 (wind shelter index) + snow persistence (15d, 30d, 60d).
 

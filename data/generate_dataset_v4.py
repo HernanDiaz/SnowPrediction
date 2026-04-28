@@ -11,9 +11,9 @@ Canales (6):
     [5] SCE        - Snow Cover Extent (codigos 0/10/11 -> binario)
 
 Split temporal:
-    Train : 2021-2022
-    Val   : 2023
-    Test  : 2024-2025
+    Train : 2021-2022-2023
+    Val   : 2024
+    Test  : 2025
 
 Filtro: se descartan tiles con < MIN_VALID_FRAC de pixeles validos en la mascara.
 
@@ -31,9 +31,9 @@ from pathlib import Path
 ROOT          = Path(__file__).resolve().parent.parent / "dataset_v4_fisico"
 MIN_VALID_FRAC = 0.30   # Descartar tiles con < 30% de pixeles validos
 
-TRAIN_YEARS = {"2021", "2022"}
-VAL_YEARS   = {"2023"}
-TEST_YEARS  = {"2024", "2025"}
+TRAIN_YEARS = {"2021", "2022", "2023"}
+VAL_YEARS   = {"2024"}
+TEST_YEARS  = {"2025"}
 
 # ---------------------------------------------------------------------------
 # Main
