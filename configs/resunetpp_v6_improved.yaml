@@ -1,0 +1,50 @@
+experiment:
+  name: resunetpp_v6_improved
+
+# ResUNet++ 5m mejorado. Mejoras sobre resunetpp_v6_300ep (R2=0.271):
+#   1. Split: train=2021-2023 (vs 2020-2022) — un año mas de entrenamiento
+#   2. Stride=128 train / 256 val-test — mas tiles con 50% overlap
+#   3. Sx_200m (vs Sx_100m) — radio recomendado por experto de dominio
+#
+# Dataset : dataset_v6_improved
+# Tiles   : 256x256 px a 5m = 1280m x 1280m de cobertura
+# Split   : train=2021-2023, val=2024, test=2025
+
+data:
+  root: "dataset_v6_improved"
+  csv_file: "dataset_v6_improved.csv"
+  images_dir: "images"
+  masks_dir: "masks"
+  source: "lidar"
+  split_type: "temporal"
+  use_sce: false
+  augmentation: true
+  augmentation_mode: "h"
+
+model:
+  architecture: "resunetpp"
+  in_channels: 17
+  out_channels: 1
+  features: [48, 96, 192, 384]
+  dropout_p: 0.1
+  num_groups: 8
+
+training:
+  batch_size: 8
+  learning_rate: 0.00039
+  epochs: 300
+  loss: "mse"
+  weight_decay: 1.6e-05
+  optimizer: "adam"
+  grad_clip: 0.0
+  scheduler: "cosine"
+  lr_min: 1.0e-6
+  early_stopping: true
+  es_patience: 30      # mas patience: pocos steps/epoca a 5m
+  num_workers: 0
+  device: "auto"
+
+output:
+  models_dir: "Articulo 1/Models"
+  results_dir: "results/resunetpp_v6_improved"
+  model_name: "resunetpp_v6_improved"

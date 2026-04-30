@@ -1,0 +1,11 @@
+{
+  "experiment": "resunetpp_v6_improved",
+  "timestamp": "2026-04-28 22:27:35",
+  "n_pixels": 295987,
+  "tta": false,
+  "MAE": 0.4972,
+  "RMSE": 0.6805,
+  "R2": 0.1579,
+  "NSE": 0.1579,
+  "Bias": -0.3239
+}

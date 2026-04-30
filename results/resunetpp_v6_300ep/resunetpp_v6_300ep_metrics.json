@@ -1,11 +1,14 @@
 {
   "experiment": "resunetpp_v6_300ep",
-  "timestamp": "2026-04-28 08:11:04",
+  "timestamp": "2026-04-28 23:00:06",
   "n_pixels": 2054019,
   "tta": false,
   "MAE": 0.4747,
   "RMSE": 0.6283,
   "R2": 0.271,
   "NSE": 0.271,
-  "Bias": -0.2669
+  "Bias": -0.2669,
+  "SPAEF": -0.4789,
+  "SPAEF_std": 2.8104,
+  "SPAEF_n_tiles": 44
 }
