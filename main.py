@@ -187,8 +187,26 @@ def main():
         choices=['train', 'evaluate', 'both'],
         help='Modo de ejecucion: train | evaluate | both  (default: train)',
     )
+    parser.add_argument(
+        '--seed',
+        type=int,
+        default=None,
+        help='Semilla aleatoria global (reproducibilidad)',
+    )
     args   = parser.parse_args()
     config = load_config(args.config)
+
+    # Semilla aleatoria (--seed sobreescribe config si existe)
+    seed = args.seed if args.seed is not None else config.get('training', {}).get('seed', None)
+    if seed is not None:
+        import random
+        import numpy as np
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+        torch.backends.cudnn.deterministic = True
+        config['training']['seed'] = seed   # propagar al historial
 
     # Resolver rutas relativas contra la raiz del repositorio
     config['data']['root']          = str(_resolve(config['data']['root']))
@@ -199,6 +217,8 @@ def main():
     print(f"  Experimento : {config['experiment']['name']}")
     print(f"  Modo        : {args.mode}")
     print(f"  Config      : {args.config}")
+    if seed is not None:
+        print(f"  Semilla     : {seed}")
     print("=" * 60)
 
     if args.mode in ('train', 'both'):

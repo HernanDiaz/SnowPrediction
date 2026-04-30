@@ -2,6 +2,69 @@ import numpy as np
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 
+def compute_spaef(obs: np.ndarray, sim: np.ndarray, n_bins: int = 100) -> float:
+    """
+    SPAEF - Spatial Efficiency (Koch et al., 2018).
+
+    Mide la similitud espacial entre dos campos considerando:
+        rho   = correlacion de Pearson (patron espacial)
+        alpha = ratio de CV  (CV_sim / CV_obs)
+        beta  = interseccion de histogramas normalizados
+
+    SPAEF = 1 - sqrt((rho-1)^2 + (alpha-1)^2 + (beta-1)^2)
+
+    Rango: (-inf, 1].  SPAEF=1: perfecto,  SPAEF=0: sin habilidad.
+    Complementa R2: R2 mide varianza pixel a pixel; SPAEF mide similitud
+    de patrones espaciales y distribucion de valores.
+
+    Args:
+        obs:    Valores observados  (1D, pixeles validos de un tile/cuenca)
+        sim:    Valores simulados   (1D, mismos pixeles)
+        n_bins: Bins para histograma (defecto: 100)
+
+    Returns:
+        Valor SPAEF (float), nan si datos insuficientes.
+
+    Ref: Koch et al. (2018), J. Geophys. Res. Atmospheres.
+    """
+    obs = np.asarray(obs, dtype=np.float64)
+    sim = np.asarray(sim, dtype=np.float64)
+    sim = np.maximum(sim, 0.0)
+
+    if len(obs) < 10:
+        return float('nan')
+
+    # rho: correlacion de Pearson
+    rho = float(np.corrcoef(obs, sim)[0, 1])
+    if np.isnan(rho):
+        return float('nan')
+
+    # alpha: ratio de coeficientes de variacion
+    mean_obs = float(np.mean(obs))
+    mean_sim = float(np.mean(sim))
+    if mean_obs == 0.0 or mean_sim == 0.0:
+        return float('nan')
+    cv_obs = float(np.std(obs)) / mean_obs
+    cv_sim = float(np.std(sim)) / mean_sim
+    if cv_obs == 0.0:
+        return float('nan')
+    alpha = cv_sim / cv_obs
+
+    # beta: interseccion de histogramas normalizados
+    lo = min(float(obs.min()), float(sim.min()))
+    hi = max(float(obs.max()), float(sim.max()))
+    if hi <= lo:
+        return float('nan')
+    bins = np.linspace(lo, hi, n_bins + 1)
+    h_obs, _ = np.histogram(obs, bins=bins)
+    h_sim, _ = np.histogram(sim, bins=bins)
+    h_obs = h_obs / (h_obs.sum() + 1e-10)
+    h_sim = h_sim / (h_sim.sum() + 1e-10)
+    beta = float(np.sum(np.minimum(h_obs, h_sim)))
+
+    return float(1.0 - np.sqrt((rho - 1.0)**2 + (alpha - 1.0)**2 + (beta - 1.0)**2))
+
+
 def compute_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
     """
     Calcula el conjunto completo de metricas para prediccion de nieve.
@@ -60,8 +123,16 @@ def print_metrics(metrics: dict, title: str = "Resultados"):
     print(f"\n{line}")
     print(f"  {title}")
     print(line)
-    unit_fields = {'MAE', 'RMSE', 'Bias', 'mean_train'}
+    unit_fields  = {'MAE', 'RMSE', 'Bias', 'mean_train'}
+    skip_fields  = {'SPAEF_std', 'SPAEF_n_tiles'}   # se muestran junto a SPAEF
     for k, v in metrics.items():
+        if k in skip_fields:
+            continue
         unit = " m" if k in unit_fields else ""
-        print(f"  {k:<12}: {v}{unit}")
+        if k == 'SPAEF':
+            n    = metrics.get('SPAEF_n_tiles', '?')
+            std  = metrics.get('SPAEF_std', float('nan'))
+            print(f"  {k:<12}: {v}  (std={std}, n={n} tiles)")
+        else:
+            print(f"  {k:<12}: {v}{unit}")
     print(f"{line}\n")

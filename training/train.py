@@ -2,6 +2,7 @@ import os
 import json
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.optim as optim
 from torch.optim.lr_scheduler import ReduceLROnPlateau, CosineAnnealingLR, CosineAnnealingWarmRestarts
 from torch.optim.swa_utils import AveragedModel, SWALR, update_bn
@@ -11,14 +12,74 @@ from tqdm import tqdm
 from utils.visualization import plot_training_curves
 
 
-def get_loss_fn(loss_name: str, huber_delta: float = 0.5) -> nn.Module:
+# ---------------------------------------------------------------------------
+# Loss espacial: MSE + lambda * (1 - Pearson)
+# ---------------------------------------------------------------------------
+
+class SpatialMSELoss(nn.Module):
+    """
+    Loss combinada: MSE pixel a pixel + penalizacion por baja correlacion espacial.
+
+    L = MSE(pred, target) + lambda_pearson * (1 - rho(pred, target))
+
+    donde rho es la correlacion de Pearson computada por tile sobre todos
+    los pixeles (H*W), promediada sobre el batch.
+
+    Propiedades:
+        - MSE garantiza que los valores sean correctos en magnitud.
+        - El termino Pearson penaliza predicciones que estan en los sitios
+          equivocados aunque tengan el valor medio correcto.
+        - Es diferenciable, por lo que es compatible con backpropagation.
+
+    Args:
+        lambda_pearson: peso del termino de correlacion (default: 0.5).
+            lambda=0.0 -> MSE puro
+            lambda=0.5 -> igual peso a ambos terminos
+            lambda=1.0 -> mas peso al patron espacial
+    """
+
+    def __init__(self, lambda_pearson: float = 0.5):
+        super().__init__()
+        self.lambda_pearson = lambda_pearson
+
+    def forward(self, pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+        # pred, target: (B, 1, H, W)
+        mse = F.mse_loss(pred, target)
+
+        if self.lambda_pearson == 0.0:
+            return mse
+
+        B = pred.shape[0]
+        p = pred.view(B, -1)    # (B, H*W)
+        t = target.view(B, -1)  # (B, H*W)
+
+        p_mean = p.mean(dim=1, keepdim=True)
+        t_mean = t.mean(dim=1, keepdim=True)
+        p_c = p - p_mean
+        t_c = t - t_mean
+
+        num   = (p_c * t_c).sum(dim=1)
+        denom = torch.sqrt((p_c ** 2).sum(dim=1) * (t_c ** 2).sum(dim=1) + 1e-8)
+        rho   = num / denom       # (B,)  en [-1, 1]
+
+        pearson_loss = (1.0 - rho).mean()
+        return mse + self.lambda_pearson * pearson_loss
+
+
+def get_loss_fn(loss_name: str, huber_delta: float = 0.5,
+                lambda_pearson: float = 0.5) -> nn.Module:
+    if loss_name == 'spatial_mse':
+        return SpatialMSELoss(lambda_pearson=lambda_pearson)
     losses = {
         'mae':   nn.L1Loss(),
         'mse':   nn.MSELoss(),
         'huber': nn.HuberLoss(delta=huber_delta),
     }
     if loss_name not in losses:
-        raise ValueError(f"Loss desconocida: '{loss_name}'. Usa 'mae', 'mse' o 'huber'.")
+        raise ValueError(
+            f"Loss desconocida: '{loss_name}'. "
+            f"Usa 'mae', 'mse', 'huber' o 'spatial_mse'."
+        )
     return losses[loss_name]
 
 
@@ -105,8 +166,11 @@ def train_model(model:        nn.Module,
                                lr=cfg_tr['learning_rate'],
                                weight_decay=weight_decay)
 
-    huber_delta  = cfg_tr.get('huber_delta', 0.5)
-    criterion    = get_loss_fn(cfg_tr['loss'], huber_delta=huber_delta)
+    huber_delta     = cfg_tr.get('huber_delta', 0.5)
+    lambda_pearson  = cfg_tr.get('lambda_pearson', 0.5)
+    criterion       = get_loss_fn(cfg_tr['loss'],
+                                  huber_delta=huber_delta,
+                                  lambda_pearson=lambda_pearson)
     epochs       = cfg_tr['epochs']
 
     # LR scheduler — 'plateau' (ReduceLROnPlateau), 'cosine' (CosineAnnealingLR),
@@ -148,6 +212,8 @@ def train_model(model:        nn.Module,
 
     history       = {'train_loss': [], 'val_loss': []}
     best_val_loss = float('inf')
+    es_patience   = cfg_tr.get('es_patience', 20)   # epocas sin mejora antes de parar
+    es_counter    = 0
 
     # Stochastic Weight Averaging (SWA)
     swa_enabled = cfg_tr.get('swa', False)
@@ -163,7 +229,8 @@ def train_model(model:        nn.Module,
                    'cosine_wr': 'CosineAnnealingWarmRestarts'}.get(sched_name, '')
     print(f"\nExperimento : {exp}")
     print(f"Loss        : {cfg_tr['loss'].upper()}"
-          + (f" (delta={huber_delta})" if cfg_tr['loss'] == 'huber' else ""))
+          + (f" (delta={huber_delta})" if cfg_tr['loss'] == 'huber' else "")
+          + (f" (lambda_pearson={lambda_pearson})" if cfg_tr['loss'] == 'spatial_mse' else ""))
     print(f"Optimizer   : {opt_name.upper()}"
           + (f"  |  GradClip: {grad_clip}" if grad_clip > 0 else "")
           + (f"  |  SWA desde ep{swa_start} (lr={swa_lr:.1e})" if swa_enabled else ""))
@@ -201,12 +268,21 @@ def train_model(model:        nn.Module,
             best_val_loss = val_loss
             torch.save(model.state_dict(), model_path)
             saved = "  [GUARDADO]"
+            es_counter = 0
+        else:
+            es_counter += 1
 
         current_lr = optimizer.param_groups[0]['lr']
         lr_str = f" | LR: {current_lr:.2e}" if sched_name else ""
+        es_str = f" | ES: {es_counter}/{es_patience}" if early_stopping else ""
         print(f"Epoch {epoch:03d}/{epochs} | "
               f"Train: {tr_loss:.4f} | "
-              f"Val: {val_loss:.4f}{lr_str}{saved}")
+              f"Val: {val_loss:.4f}{lr_str}{es_str}{saved}")
+
+        if early_stopping and es_counter >= es_patience:
+            print(f"\nEarly stopping activado en epoca {epoch} "
+                  f"(sin mejora en {es_patience} epocas consecutivas).")
+            break
 
     # SWA: actualizar BatchNorm y guardar el modelo promediado
     if swa_enabled and swa_model is not None:
