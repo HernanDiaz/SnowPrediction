@@ -94,12 +94,15 @@ def run_train(config: dict):
     train_ds = SnowDataset(train_df, imgs_dir, masks_dir,
                            use_sce=use_sce, augment=use_aug,
                            n_channels=n_channels)
+    norm_extended = cfg_data.get('norm_extended', True)
     train_ds.augment_mode   = aug_mode
     train_ds.channel_indices = channel_indices
+    train_ds.norm_extended   = norm_extended
     val_ds   = SnowDataset(val_df,   imgs_dir, masks_dir,
                            use_sce=use_sce, augment=False,
                            n_channels=n_channels)
     val_ds.channel_indices   = channel_indices
+    val_ds.norm_extended     = norm_extended
 
     train_loader = DataLoader(
         train_ds,
@@ -115,6 +118,18 @@ def run_train(config: dict):
         num_workers=cfg_tr['num_workers'],
         pin_memory=True,
     )
+
+    # Re-fijar semilla justo antes de inicializar el modelo para
+    # garantizar reproducibilidad independientemente del orden de
+    # operaciones previas (dataloaders, splits, etc.)
+    _seed = cfg_tr.get('seed', None)
+    if _seed is not None:
+        import random as _random
+        import numpy as _np
+        _random.seed(_seed)
+        _np.random.seed(_seed)
+        torch.manual_seed(_seed)
+        torch.cuda.manual_seed_all(_seed)
 
     model = build_model(config)
     train_model(model, train_loader, val_loader, config)
@@ -138,6 +153,7 @@ def run_evaluate(config: dict):
     test_ds = SnowDatasetEval(test_df, imgs_dir, masks_dir, use_sce=use_sce,
                               n_channels=n_channels)
     test_ds.channel_indices = channel_indices
+    test_ds.norm_extended   = cfg_data.get('norm_extended', True)
     test_loader = DataLoader(
         test_ds,
         batch_size=cfg_tr['batch_size'],
@@ -156,11 +172,19 @@ def run_evaluate(config: dict):
         print("Ejecuta primero con --mode train\n")
         return
 
+    # Evaluar checkpoint best (mejor val loss)
     model.load_state_dict(torch.load(model_path, map_location=device))
     print(f"Pesos cargados desde: {model_path}")
-
-    # Evaluacion del modelo
     evaluate_model(model, test_loader, device, config)
+
+    # Evaluar checkpoint last (ultima epoca) si existe
+    last_model_path = model_path.replace('.pth', '_last.pth')
+    if os.path.exists(last_model_path):
+        print(f"\n--- Evaluando checkpoint ultima epoca ---")
+        model.load_state_dict(torch.load(last_model_path, map_location=device))
+        print(f"Pesos cargados desde: {last_model_path}")
+        config_last = {**config, 'experiment': {'name': config['experiment']['name'] + '_last'}}
+        evaluate_model(model, test_loader, device, config_last)
 
     # Benchmark naive como referencia
     run_naive_benchmark(train_df, test_df, masks_dir)

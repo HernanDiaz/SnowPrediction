@@ -1,0 +1,182 @@
+[
+  {
+    "exp": "full_s42",
+    "group": "full",
+    "seed": 42,
+    "stored_R2": 0.244,
+    "stored_SPAEF": 0.2984,
+    "reproduces_oldnorm": true,
+    "weight": "Articulo 1/Models/resunetpp_v4_ms_sx200_hpo.pth",
+    "source_metrics": "results\\resunetpp_v4_ms_sx200_hpo\\resunetpp_v4_ms_sx200_hpo_metrics.json"
+  },
+  {
+    "exp": "full_s123",
+    "group": "full",
+    "seed": 123,
+    "stored_R2": -0.021,
+    "stored_SPAEF": 0.1798,
+    "reproduces_oldnorm": true,
+    "weight": "Articulo 1/Models/resunetpp_ablation_full_s123.pth",
+    "source_metrics": "results\\ablation\\resunetpp_ablation_full_s123\\resunetpp_ablation_full_s123_metrics.json"
+  },
+  {
+    "exp": "full_s7",
+    "group": "full",
+    "seed": 7,
+    "stored_R2": 0.1719,
+    "stored_SPAEF": 0.2757,
+    "reproduces_oldnorm": true,
+    "weight": "Articulo 1/Models/resunetpp_ablation_full_s7.pth",
+    "source_metrics": "results\\ablation\\resunetpp_ablation_full_s7\\resunetpp_ablation_full_s7_metrics.json"
+  },
+  {
+    "exp": "sin_pers_s42",
+    "group": "sin_pers",
+    "seed": 42,
+    "stored_R2": -0.1997,
+    "stored_SPAEF": 0.1105,
+    "reproduces_oldnorm": true,
+    "weight": "Articulo 1/Models/resunetpp_ablation_sin_pers_s42.pth",
+    "source_metrics": "results\\ablation\\resunetpp_ablation_sin_pers_s42\\resunetpp_ablation_sin_pers_s42_metrics.json"
+  },
+  {
+    "exp": "sin_pers_s123",
+    "group": "sin_pers",
+    "seed": 123,
+    "stored_R2": -0.2528,
+    "stored_SPAEF": 0.1097,
+    "reproduces_oldnorm": true,
+    "weight": "Articulo 1/Models/resunetpp_ablation_sin_pers_s123.pth",
+    "source_metrics": "results\\ablation\\resunetpp_ablation_sin_pers_s123\\resunetpp_ablation_sin_pers_s123_metrics.json"
+  },
+  {
+    "exp": "sin_pers_s7",
+    "group": "sin_pers",
+    "seed": 7,
+    "stored_R2": 0.0099,
+    "stored_SPAEF": 0.166,
+    "reproduces_oldnorm": true,
+    "weight": "Articulo 1/Models/resunetpp_ablation_sin_pers_s7.pth",
+    "source_metrics": "results\\ablation\\resunetpp_ablation_sin_pers_s7\\resunetpp_ablation_sin_pers_s7_metrics.json"
+  },
+  {
+    "exp": "sin_topo5_s42",
+    "group": "sin_topo5",
+    "seed": 42,
+    "stored_R2": -0.1828,
+    "stored_SPAEF": -0.0367,
+    "reproduces_oldnorm": true,
+    "weight": "Articulo 1/Models/resunetpp_ablation_sin_topo5_s42.pth",
+    "source_metrics": "results\\ablation\\resunetpp_ablation_sin_topo5_s42\\resunetpp_ablation_sin_topo5_s42_metrics.json"
+  },
+  {
+    "exp": "sin_topo5_s123",
+    "group": "sin_topo5",
+    "seed": 123,
+    "stored_R2": -0.2129,
+    "stored_SPAEF": 0.122,
+    "reproduces_oldnorm": true,
+    "weight": "Articulo 1/Models/resunetpp_ablation_sin_topo5_s123.pth",
+    "source_metrics": "results\\ablation\\resunetpp_ablation_sin_topo5_s123\\resunetpp_ablation_sin_topo5_s123_metrics.json"
+  },
+  {
+    "exp": "sin_topo5_s7",
+    "group": "sin_topo5",
+    "seed": 7,
+    "stored_R2": 0.0526,
+    "stored_SPAEF": 0.1435,
+    "reproduces_oldnorm": true,
+    "weight": "Articulo 1/Models/resunetpp_ablation_sin_topo5_s7.pth",
+    "source_metrics": "results\\ablation\\resunetpp_ablation_sin_topo5_s7\\resunetpp_ablation_sin_topo5_s7_metrics.json"
+  },
+  {
+    "exp": "sin_sx_s42",
+    "group": "sin_sx",
+    "seed": 42,
+    "stored_R2": -0.0398,
+    "stored_SPAEF": 0.1711,
+    "reproduces_oldnorm": true,
+    "weight": "Articulo 1/Models/resunetpp_ablation_sin_sx_s42.pth",
+    "source_metrics": "results\\ablation\\resunetpp_ablation_sin_sx_s42\\resunetpp_ablation_sin_sx_s42_metrics.json"
+  },
+  {
+    "exp": "sin_sx_s123",
+    "group": "sin_sx",
+    "seed": 123,
+    "stored_R2": 0.1156,
+    "stored_SPAEF": 0.2238,
+    "reproduces_oldnorm": true,
+    "weight": "Articulo 1/Models/resunetpp_ablation_sin_sx_s123.pth",
+    "source_metrics": "results\\ablation\\resunetpp_ablation_sin_sx_s123\\resunetpp_ablation_sin_sx_s123_metrics.json"
+  },
+  {
+    "exp": "sin_sx_s7",
+    "group": "sin_sx",
+    "seed": 7,
+    "stored_R2": 0.1923,
+    "stored_SPAEF": 0.2787,
+    "reproduces_oldnorm": true,
+    "weight": "Articulo 1/Models/resunetpp_ablation_sin_sx_s7.pth",
+    "source_metrics": "results\\ablation\\resunetpp_ablation_sin_sx_s7\\resunetpp_ablation_sin_sx_s7_metrics.json"
+  },
+  {
+    "exp": "sin_topo1_s42",
+    "group": "sin_topo1",
+    "seed": 42,
+    "stored_R2": 0.0179,
+    "stored_SPAEF": 0.1924,
+    "reproduces_oldnorm": true,
+    "weight": "Articulo 1/Models/resunetpp_ablation_sin_topo1_s42.pth",
+    "source_metrics": "results\\ablation\\resunetpp_ablation_sin_topo1_s42\\resunetpp_ablation_sin_topo1_s42_metrics.json"
+  },
+  {
+    "exp": "sin_topo1_s123",
+    "group": "sin_topo1",
+    "seed": 123,
+    "stored_R2": 0.2093,
+    "stored_SPAEF": 0.2869,
+    "reproduces_oldnorm": true,
+    "weight": "Articulo 1/Models/resunetpp_ablation_sin_topo1_s123.pth",
+    "source_metrics": "results\\ablation\\resunetpp_ablation_sin_topo1_s123\\resunetpp_ablation_sin_topo1_s123_metrics.json"
+  },
+  {
+    "exp": "sin_topo1_s7",
+    "group": "sin_topo1",
+    "seed": 7,
+    "stored_R2": 0.0101,
+    "stored_SPAEF": 0.1798,
+    "reproduces_oldnorm": true,
+    "weight": "Articulo 1/Models/resunetpp_ablation_sin_topo1_s7.pth",
+    "source_metrics": "results\\ablation\\resunetpp_ablation_sin_topo1_s7\\resunetpp_ablation_sin_topo1_s7_metrics.json"
+  },
+  {
+    "exp": "sin_sce_s42",
+    "group": "sin_sce",
+    "seed": 42,
+    "stored_R2": 0.1333,
+    "stored_SPAEF": 0.2109,
+    "reproduces_oldnorm": true,
+    "weight": "Articulo 1/Models/resunetpp_ablation_sin_sce_s42.pth",
+    "source_metrics": "results\\ablation\\resunetpp_ablation_sin_sce_s42\\resunetpp_ablation_sin_sce_s42_metrics.json"
+  },
+  {
+    "exp": "sin_sce_s123",
+    "group": "sin_sce",
+    "seed": 123,
+    "stored_R2": 0.1646,
+    "stored_SPAEF": 0.2546,
+    "reproduces_oldnorm": true,
+    "weight": "Articulo 1/Models/resunetpp_ablation_sin_sce_s123.pth",
+    "source_metrics": "results\\ablation\\resunetpp_ablation_sin_sce_s123\\resunetpp_ablation_sin_sce_s123_metrics.json"
+  },
+  {
+    "exp": "sin_sce_s7",
+    "group": "sin_sce",
+    "seed": 7,
+    "stored_R2": 0.0992,
+    "stored_SPAEF": 0.2595,
+    "reproduces_oldnorm": true,
+    "weight": "Articulo 1/Models/resunetpp_ablation_sin_sce_s7.pth",
+    "source_metrics": "results\\ablation\\resunetpp_ablation_sin_sce_s7\\resunetpp_ablation_sin_sce_s7_metrics.json"
+  }
+]

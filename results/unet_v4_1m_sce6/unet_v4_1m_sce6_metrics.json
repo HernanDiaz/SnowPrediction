@@ -1,11 +1,14 @@
 {
   "experiment": "unet_v4_1m_sce6",
-  "timestamp": "2026-04-28 07:53:03",
-  "n_pixels": 131481352,
+  "timestamp": "2026-05-06 11:22:04",
+  "n_pixels": 46947202,
   "tta": false,
-  "MAE": 0.547,
-  "RMSE": 0.7219,
-  "R2": 0.0598,
-  "NSE": 0.0598,
-  "Bias": -0.2319
+  "MAE": 0.5641,
+  "RMSE": 0.743,
+  "R2": -0.052,
+  "NSE": -0.052,
+  "Bias": -0.3606,
+  "SPAEF": 0.0684,
+  "SPAEF_std": 0.284,
+  "SPAEF_n_tiles": 850
 }

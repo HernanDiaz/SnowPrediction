@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from models.resunet import ResUNetPP
+from models.unet_gn import UNetGN
 
 
 class DoubleConv(nn.Module):
@@ -223,6 +224,13 @@ def build_model(config: dict) -> nn.Module:
         model = UNet(in_channels=in_ch, out_channels=out_ch,
                      features=features, dropout_p=dropout_p)
 
+    elif arch == 'unet_gn':
+        features = cfg.get('features', [64, 128, 256, 512])
+        num_groups = cfg.get('num_groups', 8)
+        model = UNetGN(in_channels=in_ch, out_channels=out_ch,
+                       features=features, dropout_p=dropout_p,
+                       num_groups=num_groups)
+
     elif arch == 'unet_small':
         features = cfg.get('features', [32, 64, 128, 256])
         model = UNet(in_channels=in_ch, out_channels=out_ch,
@@ -242,7 +250,8 @@ def build_model(config: dict) -> nn.Module:
 
     else:
         raise ValueError(f"Arquitectura desconocida: '{arch}'. "
-                         f"Disponibles: 'unet', 'unet_small', 'attention_unet', 'resunetpp'")
+                         f"Disponibles: 'unet', 'unet_gn', 'unet_small', "
+                         f"'attention_unet', 'resunetpp'")
 
     n_params = model.count_parameters()
     print(f"Modelo     : {arch}")

@@ -1,0 +1,17 @@
+{
+  "experiment": "resunetpp_hpo_sp10_s7_last",
+  "timestamp": "2026-05-27 11:35:31",
+  "n_pixels": 11933976,
+  "tta": false,
+  "MAE": 0.5424,
+  "RMSE": 0.7287,
+  "R2": -0.0016,
+  "NSE": -0.0016,
+  "Bias": -0.3319,
+  "SPAEF": -0.0905,
+  "SPAEF_std": 0.5826,
+  "SPAEF_n_tiles": 220,
+  "MSPAEF": 0.3712,
+  "MSPAEF_std": 0.7395,
+  "MSPAEF_n_tiles": 220
+}

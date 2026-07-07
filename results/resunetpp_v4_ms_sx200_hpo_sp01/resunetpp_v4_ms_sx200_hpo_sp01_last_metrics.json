@@ -1,0 +1,17 @@
+{
+  "experiment": "resunetpp_v4_ms_sx200_hpo_sp01_last",
+  "timestamp": "2026-05-19 05:09:07",
+  "n_pixels": 11933976,
+  "tta": false,
+  "MAE": 0.498,
+  "RMSE": 0.6737,
+  "R2": 0.1438,
+  "NSE": 0.1438,
+  "Bias": -0.1736,
+  "SPAEF": 0.1819,
+  "SPAEF_std": 0.4121,
+  "SPAEF_n_tiles": 220,
+  "MSPAEF": 0.4138,
+  "MSPAEF_std": 0.8222,
+  "MSPAEF_n_tiles": 220
+}

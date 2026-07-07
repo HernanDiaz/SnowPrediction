@@ -1,0 +1,49 @@
+experiment:
+  name: b1_unet
+
+# PAPER - Block 1: Architecture comparison baseline.
+# U-Net trained on the reference dataset (dataset_v4_ms_sx200, 22ch, 1m).
+# Direct comparison with b1_resunetpp using the same dataset and split.
+#
+# Dataset : dataset_v4_ms_sx200 (1m, 22ch, Sx_200m)
+# Split   : train=2021-2023, val=2024, test=2025
+# Seed    : 42 (fixed for reproducibility)
+
+data:
+  root: "dataset_v4_ms_sx200"
+  csv_file: "dataset_v4_ms_sx200.csv"
+  images_dir: "images"
+  masks_dir: "masks"
+  source: "lidar"
+  split_type: "temporal"
+  use_sce: false
+  augmentation: true
+  augmentation_mode: "h"
+
+model:
+  architecture: "unet"
+  in_channels: 22
+  out_channels: 1
+  features: [48, 96, 192, 384]
+  dropout_p: 0.1
+
+training:
+  seed: 42
+  batch_size: 8
+  learning_rate: 0.00039
+  epochs: 300
+  loss: "mse"
+  weight_decay: 1.6e-05
+  optimizer: "adam"
+  grad_clip: 0.0
+  scheduler: "cosine"
+  lr_min: 1.0e-6
+  early_stopping: true
+  es_patience: 20
+  num_workers: 0
+  device: "auto"
+
+output:
+  models_dir: "Articulo 1/Models"
+  results_dir: "paper/results/block1/b1_unet"
+  model_name: "b1_unet"

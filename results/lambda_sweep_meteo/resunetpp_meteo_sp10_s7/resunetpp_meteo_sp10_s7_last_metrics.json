@@ -1,0 +1,17 @@
+{
+  "experiment": "resunetpp_meteo_sp10_s7_last",
+  "timestamp": "2026-06-07 08:50:46",
+  "n_pixels": 11933976,
+  "tta": false,
+  "MAE": 0.5628,
+  "RMSE": 0.7435,
+  "R2": -0.0427,
+  "NSE": -0.0427,
+  "Bias": -0.3533,
+  "SPAEF": -0.2291,
+  "SPAEF_std": 0.7007,
+  "SPAEF_n_tiles": 220,
+  "MSPAEF": 0.3672,
+  "MSPAEF_std": 0.5364,
+  "MSPAEF_n_tiles": 220
+}

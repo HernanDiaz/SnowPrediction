@@ -1,0 +1,77 @@
+\section{Related work}
+\label{sec:related}
+
+\subsection{Snow-depth and SWE mapping from terrain and remote sensing}
+
+The spatial distribution of mountain snow has traditionally been modelled by
+relating snow depth or snow water equivalent (SWE) to terrain attributes
+through statistical regression. Elevation, slope, aspect (often decomposed
+into northness and eastness), curvature and topographic position indices are
+the classical predictors \citep{elder1991,molotch2005,revuelto2014}. Wind
+redistribution, a dominant control in alpine terrain, is commonly represented
+by terrain-based parameters such as the maximum upwind slope $S_x$
+\citep{winstral2002,winstral2013}, which we also adopt here. More recently,
+machine-learning regressors -- particularly Random Forests
+\citep{breiman2001} -- have become a de-facto standard for HS/SWE
+interpolation because they handle non-linear interactions and large predictor
+sets robustly \citep{broxton2019,king2020,ntokas2021}. These pixel-wise
+methods are strong baselines but, by construction, ignore the spatial
+arrangement of neighbouring pixels.
+
+\subsection{Deep learning for high-resolution environmental mapping}
+
+Convolutional neural networks have transformed dense prediction tasks in
+remote sensing, from land-cover classification and change detection
+\citep{daudt2018} to super-resolution and regression of continuous
+geophysical fields. Encoder--decoder architectures with skip connections, of
+which the U-Net \citep{ronneberger2015} is the archetype, are especially
+well suited to mapping problems because they combine multi-scale context with
+spatially precise outputs. Residual and attention-augmented variants such as
+ResUNet \citep{zhang2018} and ResUNet++ \citep{jha2019} add residual blocks,
+squeeze-and-excitation and atrous spatial pyramid pooling, which stabilise
+training and improve the modelling of multi-scale structures. In the snow
+context, CNNs and other deep models have been explored for snow-cover
+mapping, SWE reconstruction and downscaling
+\citep{king2020,mital2022}, but high-resolution (metre-scale) HS regression
+from LiDAR remains comparatively under-explored, and systematic comparisons
+against strong tabular baselines under temporally disjoint evaluation are
+scarce. The work most closely related to ours is MAPunet \citep{betato2025mapunet},
+which casts high-resolution HS mapping as U-Net \emph{pixel-wise regression}
+from a multi-channel stack of topographic and snow-related predictors and
+applies it over the Swiss Alps (Davos). The present study builds directly on
+that pixel-wise regression framework but (i) replaces the plain U-Net backbone
+with a residual, attention-augmented ResUNet++; (ii) adds a pattern-oriented
+spatial loss and pattern-aware metrics (\SPAEF{}/\MSPAEF{}); and (iii) evaluates
+under a strictly temporal split with a multi-seed stability analysis.
+
+\subsection{Evaluation metrics for spatial fields}
+
+Pixel-wise metrics (\Rsq{}, RMSE, MAE, bias, Nash--Sutcliffe efficiency)
+dominate the snow-modelling literature, yet they assess only the marginal
+agreement between predicted and observed values and are blind to the spatial
+organisation of the error. The Spatial Efficiency metric (\SPAEF{})
+introduced by \citet{koch2018} was designed precisely to evaluate the fidelity
+of spatial patterns, by combining three complementary components: the Pearson
+correlation between the two fields, the ratio of their coefficients of
+variation, and the overlap of their value histograms. \SPAEF{} and related
+multi-component metrics have since been adopted to benchmark distributed
+hydrological and land-surface models \citep{koch2018,demirel2018}. Despite
+their suitability, such pattern-oriented metrics are rarely used for
+high-resolution snow mapping. We argue, and demonstrate empirically, that they
+are necessary to obtain an honest picture of model quality and stability, and
+we further use them -- through a differentiable spatial-correlation term -- to
+\emph{guide} the optimisation, not merely to evaluate it.
+
+\subsection{Pattern-oriented and physics-aware losses}
+
+Optimising solely a pixel-wise loss (MSE/MAE) tends to produce regression to
+the mean and over-smoothed fields. To counteract this, a growing body of work
+augments the training objective with structural or perceptual terms -- for
+example structural similarity (SSIM) losses, gradient-difference losses, or
+adversarial terms -- so that the model is rewarded for reproducing spatial
+structure \citep{zhao2017}. In the environmental domain, correlation-based and
+multi-scale loss terms have been used to better preserve spatial texture.
+Building on this idea, we propose a simple and interpretable hybrid loss that
+linearly blends MSE with a spatial Pearson-correlation penalty controlled by a
+single hyperparameter $\lpear$, and we characterise its effect on both
+accuracy and spatial pattern fidelity through a full sweep.

@@ -7,7 +7,7 @@ import pandas as pd
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from utils.metrics import compute_metrics, compute_naive_benchmark, compute_spaef, print_metrics
+from utils.metrics import compute_metrics, compute_naive_benchmark, compute_spaef, compute_mspaef, print_metrics
 from utils.visualization import plot_scatter, plot_predictions
 
 
@@ -79,7 +79,8 @@ def evaluate_model(model:       torch.nn.Module,
 
     model.eval()
     all_preds, all_targets = [], []
-    spaef_per_tile = []
+    spaef_per_tile  = []
+    mspaef_per_tile = []
     s_imgs, s_masks, s_preds, s_ids = [], [], [], []
 
     with torch.no_grad():
@@ -114,7 +115,7 @@ def evaluate_model(model:       torch.nn.Module,
                 all_preds.extend(out_flat[valid].tolist())
                 all_targets.extend(tgt_flat[valid].tolist())
 
-            # SPAEF por tile (sobre pixeles validos de cada tile individual)
+            # SPAEF y MSPAEF por tile (sobre pixeles validos de cada tile individual)
             for b in range(targets.shape[0]):
                 tgt_tile = targets[b, 0].flatten()
                 out_tile = outputs[b, 0].flatten()
@@ -123,19 +124,29 @@ def evaluate_model(model:       torch.nn.Module,
                     spaef_val = compute_spaef(tgt_tile[v], out_tile[v])
                     if not np.isnan(spaef_val):
                         spaef_per_tile.append(spaef_val)
+                    mspaef_val = compute_mspaef(tgt_tile[v], out_tile[v])
+                    if not np.isnan(mspaef_val):
+                        mspaef_per_tile.append(mspaef_val)
 
     y_pred = np.array(all_preds)
     y_true = np.array(all_targets)
 
     metrics = compute_metrics(y_true, y_pred)
 
-    # Anadir SPAEF medio al diccionario de metricas
+    # Anadir SPAEF y MSPAEF medios al diccionario de metricas
     if spaef_per_tile:
-        metrics['SPAEF'] = round(float(np.mean(spaef_per_tile)), 4)
-        metrics['SPAEF_std'] = round(float(np.std(spaef_per_tile)), 4)
+        metrics['SPAEF']        = round(float(np.mean(spaef_per_tile)), 4)
+        metrics['SPAEF_std']    = round(float(np.std(spaef_per_tile)),  4)
         metrics['SPAEF_n_tiles'] = len(spaef_per_tile)
     else:
         metrics['SPAEF'] = float('nan')
+
+    if mspaef_per_tile:
+        metrics['MSPAEF']        = round(float(np.mean(mspaef_per_tile)), 4)
+        metrics['MSPAEF_std']    = round(float(np.std(mspaef_per_tile)),  4)
+        metrics['MSPAEF_n_tiles'] = len(mspaef_per_tile)
+    else:
+        metrics['MSPAEF'] = float('nan')
 
     print_metrics(metrics, title=f"Test Set - {exp}")
 

@@ -62,6 +62,13 @@ class SnowDataset(Dataset):
         # Para dataset v6 (33 canales con huecos) usar [0..13, 30..32].
         self.channel_indices = None   # se puede sobreescribir desde main.py
 
+        # Normalizacion de los canales "extendidos" (topografia 5m 17-21 y
+        # meteorologia 22+). True = comportamiento actual (se normalizan).
+        # False = comportamiento antiguo: esos canales entran en CRUDO, tal como
+        # se entrenaron los experimentos de 22ch previos al parche de _normalize.
+        # Se fija desde main.py via config data.norm_extended (default True).
+        self.norm_extended = True     # se puede sobreescribir desde main.py
+
     def __len__(self):
         return len(self.df)
 
@@ -78,12 +85,12 @@ class SnowDataset(Dataset):
             return (torch.zeros((self.n_channels, 256, 256)),
                     torch.zeros((1, 256, 256)))
 
+        image, mask = self._clean(image, mask)
+        image = self._normalize(image)
         if self.channel_indices is not None:
             image = image[self.channel_indices, :, :]
         else:
             image = image[:self.n_channels, :, :]
-        image, mask = self._clean(image, mask)
-        image = self._normalize(image)
 
         if self.augment:
             image, mask = self._augment(image, mask)
@@ -101,6 +108,8 @@ class SnowDataset(Dataset):
         return image, mask
 
     def _normalize(self, image: np.ndarray) -> np.ndarray:
+        n = image.shape[0]  # usar tamano real, no self.n_channels
+
         # Canales base (presentes en todos los datasets)
         image[0] = (image[0] - self.NORM['dem_mean']) / self.NORM['dem_std']
         image[1] = image[1] / self.NORM['slope_max']
@@ -109,14 +118,46 @@ class SnowDataset(Dataset):
         image[4] = np.clip(image[4] / self.NORM['tpi_max'], -1.0, 1.0)
 
         # Canal 5 (SCE): codigos 0/10/11 -> binario [0, 1]
-        if self.n_channels >= 6:
+        if n >= 6:
             image[5] = (image[5] > 5).astype(np.float32)
 
         # Canales 6-13 (Sx): angulos de horizonte en grados -> [-1, 1]
-        if self.n_channels >= 14:
+        if n >= 14:
             image[6:14] = np.clip(image[6:14] / self.NORM['sx_max'], -1.0, 1.0)
 
         # Canales 14-16 (persistencia nival): ya en [0, 1], no requieren normalizacion
+
+        # Canales 17-21 (topografia 5m): misma normalizacion que 1m
+        # (solo si norm_extended; los experimentos 22ch antiguos los usaban crudos)
+        if n >= 22 and self.norm_extended:
+            image[17] = (image[17] - self.NORM['dem_mean']) / self.NORM['dem_std']
+            image[18] = image[18] / self.NORM['slope_max']
+            # 19 (northness_5m) y 20 (eastness_5m) ya en [-1, 1]
+            image[21] = np.clip(image[21] / self.NORM['tpi_max'], -1.0, 1.0)
+
+        # Canales 22-25 (meteorologia correo2): escalares por fecha
+        # t2m_7d, t2m_15d, t2m_30d en degC -> dividir por 10 (rango aprox -5 a +10)
+        # ppAcc_from_oct en mm -> dividir por 1000 (rango aprox 0 a 2000)
+        if n >= 26 and self.norm_extended:
+            image[22] = image[22] / 10.0
+            image[23] = image[23] / 10.0
+            image[24] = image[24] / 10.0
+            image[25] = image[25] / 1000.0
+
+        # Canales 26-34 (meteorologia correo3): escalares por fecha
+        # ws_7d, ws_15d, ws_30d en m/s -> dividir por 10 (rango 0-9)
+        # rh_7d, rh_15d, rh_30d en % -> dividir por 100 (rango 0-100)
+        # rad_7d, rad_15d, rad_30d en W/m2 -> dividir por 600 (rango 0-600)
+        if n >= 35 and self.norm_extended:
+            image[26] = image[26] / 10.0
+            image[27] = image[27] / 10.0
+            image[28] = image[28] / 10.0
+            image[29] = image[29] / 100.0
+            image[30] = image[30] / 100.0
+            image[31] = image[31] / 100.0
+            image[32] = image[32] / 600.0
+            image[33] = image[33] / 600.0
+            image[34] = image[34] / 600.0
 
         return image
 
@@ -174,12 +215,12 @@ class SnowDatasetEval(SnowDataset):
                     torch.zeros((1, 256, 256)),
                     tile_id)
 
+        image, mask = self._clean(image, mask)
+        image = self._normalize(image)
         if self.channel_indices is not None:
             image = image[self.channel_indices, :, :]
         else:
             image = image[:self.n_channels, :, :]
-        image, mask = self._clean(image, mask)
-        image = self._normalize(image)
 
         return torch.from_numpy(image), torch.from_numpy(mask).unsqueeze(0), tile_id
 

@@ -1,0 +1,17 @@
+{
+  "experiment": "unet_gn_oldnorm_s123_last",
+  "timestamp": "2026-06-20 17:37:39",
+  "n_pixels": 11933976,
+  "tta": false,
+  "MAE": 0.5015,
+  "RMSE": 0.6771,
+  "R2": 0.1353,
+  "NSE": 0.1353,
+  "Bias": -0.1969,
+  "SPAEF": 0.237,
+  "SPAEF_std": 0.3163,
+  "SPAEF_n_tiles": 220,
+  "MSPAEF": -0.0323,
+  "MSPAEF_std": 3.8407,
+  "MSPAEF_n_tiles": 220
+}

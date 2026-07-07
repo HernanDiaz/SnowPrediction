@@ -1,0 +1,47 @@
+\section{Conclusions}
+\label{sec:conclusions}
+
+We presented a reproducible benchmark for high-resolution (1\,m) snow-depth
+prediction in the Izas experimental catchment of the Central Spanish Pyrenees,
+built from a 27-date airborne LiDAR time series and a rich stack of
+topographic, wind-sheltering and snow-history predictors provided in
+collaboration with IPE--CSIC. Using a strictly temporal train/validation/test
+split that forces extrapolation to an exceptionally snowy year, we compared a
+Random Forest baseline with U-Net and ResUNet++ convolutional networks, and we
+evaluated all models with pattern-aware spatial metrics (\SPAEF{}, \MSPAEF{})
+in addition to conventional pixel-wise scores.
+
+Our main conclusions are:
+
+\begin{itemize}
+  \item \textbf{ResUNet++ with a spatial loss is the best and most reliable
+  model.} At the optimal spatial-loss weight $\lpear=0.4$ it achieves
+  \Rsq{}~$=0.208\pm0.027$ and \SPAEF{}~$=0.297\pm0.018$, outperforming both the
+  Random Forest (\SPAEF{}~$=0.107$) and a far less stable plain U-Net
+  (\Rsq{}~$=0.054\pm0.124$, \SPAEF{}~$=0.186$).
+
+  \item \textbf{Pattern-aware evaluation is essential.} \SPAEF{} reverses the
+  ranking of the Random Forest and the U-Net relative to \Rsq{}, and reveals
+  that the per-pixel RF reproduces the spatial pattern almost three times worse
+  than ResUNet++ -- effects that an \Rsq{}-only assessment would miss. We
+  recommend reporting \SPAEF{}/\MSPAEF{} and multi-seed statistics as standard
+  practice in high-resolution snow mapping.
+
+  \item \textbf{The hybrid spatial loss helps twice.} Blending pixel-wise MSE
+  with a spatial-correlation term improves both accuracy and pattern fidelity
+  and substantially reduces the variance across seeds, with a clear optimum at
+  $\lpear=0.4$.
+
+  \item \textbf{Snow history and meso-scale topography are the key
+  predictors,} whereas instantaneous satellite snow-cover extent is nearly
+  redundant, and scalar meteorological forcing does not significantly improve
+  the prediction for this catchment.
+\end{itemize}
+
+By coupling a stable, attention-augmented architecture with a pattern-oriented
+loss and evaluation, this work provides both a methodological template and a
+public benchmark for high-resolution snow-depth mapping. Future work will
+extend the approach to multiple catchments and snow climates, incorporate
+spatially distributed meteorological forcing and cloud-aware snow-history
+inputs, and assess transferability across years with contrasting snow
+conditions.

@@ -1,0 +1,103 @@
+\section{Introduction}
+\label{sec:intro}
+
+Seasonal snow is a key component of the mountain water cycle. In
+Mediterranean mountain ranges such as the Pyrenees, snowmelt sustains river
+discharge, reservoir storage, hydropower generation and irrigation during the
+dry season, and the spatial distribution of the snowpack governs avalanche
+hazard, soil moisture and the timing of vegetation growth
+\citep{lopezmoreno2013,fayad2017}. Snow depth (HS) is highly variable in
+space: wind redistribution, terrain shading, slope, aspect and preferential
+deposition produce sharp gradients over distances of a few metres, especially
+in wind-exposed alpine terrain \citep{mott2018,revuelto2014}. Capturing this
+fine-scale variability is therefore essential, but it is precisely where
+coarse-resolution products and point measurements fail.
+
+Airborne and terrestrial Light Detection and Ranging (LiDAR) surveys have
+become the reference technique for mapping HS at sub-metre resolution by
+differencing snow-on and snow-off digital surface models
+\citep{deems2013,painter2016}. However, LiDAR acquisitions are expensive and
+logistically demanding, so they can only be carried out on a limited number of
+dates per season. This motivates the development of predictive models that can
+\emph{interpolate and extrapolate} HS from a small set of LiDAR surveys, using
+spatially exhaustive and inexpensive predictors such as terrain attributes,
+satellite-derived snow-cover information and meteorological forcing.
+
+Two broad families of methods have been applied to this problem. Statistical
+and machine-learning regressors (multiple linear regression, generalised
+additive models, Random Forests, gradient boosting) operate on a per-pixel
+basis and have proven effective at relating HS to topographic predictors
+\citep{revuelto2014,broxton2019}. Their main limitation is that they treat
+each pixel independently and therefore cannot exploit the spatial context of
+the snowpack. Convolutional neural networks (CNNs), by contrast, learn
+spatially structured representations and have recently been used for snow and
+related cryospheric mapping tasks \citep{daudt2018,king2020}. Yet most studies
+still evaluate model quality almost exclusively with pixel-wise metrics --
+coefficient of determination (\Rsq{}), root mean squared error (RMSE), mean
+absolute error (MAE) -- which reward the correct prediction of the mean and
+penalise outliers, but are largely insensitive to whether the model reproduces
+the \emph{spatial pattern} of accumulation and scour. A model can attain a
+respectable \Rsq{} while producing an over-smoothed map that misses the very
+drift features that matter for avalanche and hydrological applications.
+
+In this work we address both the modelling and the evaluation sides of this
+gap. We build a high-resolution (1\,m) HS prediction benchmark for the Izas
+experimental catchment in the Central Spanish Pyrenees, using a 27-date LiDAR
+time series (2021--2025) provided in collaboration with the Pyrenean
+Institute of Ecology (IPE--CSIC). On top of this benchmark we (i) compare a
+Random Forest baseline with two CNN architectures (U-Net and ResUNet++) under
+a strict temporal train/validation/test split, (ii) adopt the Spatial
+Efficiency metric (\SPAEF{}) and a modified, bias-aware variant (\MSPAEF{}) as
+pattern-oriented evaluation criteria alongside the conventional pixel-wise
+metrics, and (iii) introduce a hybrid spatial loss that explicitly optimises
+for spatial pattern fidelity through a tunable correlation term.
+
+\subsection{Contributions}
+\label{subsec:contributions}
+
+The main contributions of this paper are:
+
+\begin{enumerate}
+  \item \textbf{A reproducible 1\,m snow-depth benchmark} for a Pyrenean
+  catchment, built from airborne LiDAR and a rich stack of 22 topographic,
+  snow-cover and wind-redistribution predictors, with a temporally
+  disjoint test year (2025) that stresses the extrapolation ability of the
+  models.
+
+  \item \textbf{A pattern-aware evaluation protocol} based on \SPAEF{} and
+  \MSPAEF{}, which we show to be far more discriminative than \Rsq{} for this
+  task -- in particular, it exposes a ranking reversal between the Random Forest
+  and the U-Net (the RF leads on \Rsq{} but the U-Net leads on \SPAEF{}) and the
+  strong seed-instability of the plain U-Net, both of which a single-run,
+  \Rsq{}-only assessment would hide.
+
+  \item \textbf{A hybrid spatial loss} combining pixel-wise mean squared error
+  with a spatial Pearson-correlation term weighted by a hyperparameter
+  $\lpear$, together with a complete sweep ($\lpear\in[0,1]$, eight values,
+  three seeds) that identifies $\lpear=0.4$ as the optimum, improving both
+  \Rsq{} and \SPAEF{} while halving the variance across seeds.
+
+  \item \textbf{A leave-one-group-out ablation} of the predictor channels that
+  quantifies the relative importance of fine/coarse topography, snow
+  persistence, wind sheltering and satellite snow-cover extent.
+
+  \item \textbf{An analysis of meteorological forcing} (air temperature and
+  accumulated precipitation as additional channels), showing that, for this
+  catchment and predictor set, meteorological inputs do not significantly
+  improve the prediction once topography and snow history are available.
+\end{enumerate}
+
+\subsection{Paper organisation}
+\label{subsec:organisation}
+
+The remainder of the paper is organised as follows.
+Section~\ref{sec:related} reviews related work on snow-depth modelling, deep
+learning for environmental mapping and spatial evaluation metrics.
+Section~\ref{sec:data} describes the study area, the LiDAR-derived dataset and
+the predictor channels.
+Section~\ref{sec:methods} presents the models, the \SPAEF{}/\MSPAEF{} metrics
+and the spatial loss, together with the experimental protocol.
+Section~\ref{sec:results} reports the model comparison, the $\lpear$ sweep, the
+channel ablation and the meteorological experiments.
+Section~\ref{sec:discussion} discusses the implications and limitations, and
+Section~\ref{sec:conclusions} concludes.

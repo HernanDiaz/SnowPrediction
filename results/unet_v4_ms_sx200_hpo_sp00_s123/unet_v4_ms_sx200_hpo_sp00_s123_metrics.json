@@ -1,0 +1,17 @@
+{
+  "experiment": "unet_v4_ms_sx200_hpo_sp00_s123",
+  "timestamp": "2026-06-08 22:11:21",
+  "n_pixels": 11933976,
+  "tta": false,
+  "MAE": 0.5715,
+  "RMSE": 0.7378,
+  "R2": -0.0267,
+  "NSE": -0.0267,
+  "Bias": -0.3873,
+  "SPAEF": 0.1318,
+  "SPAEF_std": 0.395,
+  "SPAEF_n_tiles": 220,
+  "MSPAEF": 0.2597,
+  "MSPAEF_std": 0.8537,
+  "MSPAEF_n_tiles": 220
+}

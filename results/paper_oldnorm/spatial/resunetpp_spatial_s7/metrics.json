@@ -1,0 +1,17 @@
+{
+  "experiment": "resunetpp_spatial_oldnorm_s7",
+  "timestamp": "2026-06-21 07:26:43",
+  "n_pixels": 41235354,
+  "tta": false,
+  "MAE": 0.621,
+  "RMSE": 0.8904,
+  "R2": 0.0251,
+  "NSE": 0.0251,
+  "Bias": -0.4667,
+  "SPAEF": 0.3008,
+  "SPAEF_std": 0.1734,
+  "SPAEF_n_tiles": 730,
+  "MSPAEF": 0.5807,
+  "MSPAEF_std": 0.4689,
+  "MSPAEF_n_tiles": 730
+}

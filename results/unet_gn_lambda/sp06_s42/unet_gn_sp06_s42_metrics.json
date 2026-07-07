@@ -1,0 +1,17 @@
+{
+  "experiment": "unet_gn_sp06_s42",
+  "timestamp": "2026-06-18 18:36:57",
+  "n_pixels": 11933976,
+  "tta": false,
+  "MAE": 0.5207,
+  "RMSE": 0.6912,
+  "R2": 0.099,
+  "NSE": 0.099,
+  "Bias": -0.3062,
+  "SPAEF": 0.171,
+  "SPAEF_std": 0.4147,
+  "SPAEF_n_tiles": 220,
+  "MSPAEF": 0.407,
+  "MSPAEF_std": 0.6568,
+  "MSPAEF_n_tiles": 220
+}

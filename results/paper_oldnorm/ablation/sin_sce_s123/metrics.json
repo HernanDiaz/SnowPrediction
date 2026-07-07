@@ -1,0 +1,17 @@
+{
+  "experiment": "resunetpp_ablation_sin_sce_s123",
+  "timestamp": "2026-05-24 07:16:48",
+  "n_pixels": 11933976,
+  "tta": false,
+  "MAE": 0.4903,
+  "RMSE": 0.6655,
+  "R2": 0.1646,
+  "NSE": 0.1646,
+  "Bias": -0.221,
+  "SPAEF": 0.2546,
+  "SPAEF_std": 0.3175,
+  "SPAEF_n_tiles": 220,
+  "MSPAEF": 0.47,
+  "MSPAEF_std": 0.5807,
+  "MSPAEF_n_tiles": 220
+}

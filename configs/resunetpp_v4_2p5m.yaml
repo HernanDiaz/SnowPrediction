@@ -1,0 +1,48 @@
+experiment:
+  name: resunetpp_v4_2p5m
+
+# ResUNet++ a 2.5m de resolucion con 17 canales (Sx_200m).
+# Misma configuracion que resunetpp_v6_300ep para comparacion directa,
+# cambiando solo dataset (2.5m vs 5m) y radio Sx (200m vs 100m).
+#
+# Dataset : dataset_v4_2p5m (590 tiles: 507 train / 55 val / 28 test)
+# Split   : train=2021-2023, val=2024, test=2025
+
+data:
+  root: "dataset_v4_2p5m"
+  csv_file: "dataset_v4_2p5m.csv"
+  images_dir: "images"
+  masks_dir: "masks"
+  source: "lidar"
+  split_type: "temporal"
+  use_sce: false
+  augmentation: true
+  augmentation_mode: "h"
+
+model:
+  architecture: "resunetpp"
+  in_channels: 17
+  out_channels: 1
+  features: [48, 96, 192, 384]
+  dropout_p: 0.1
+  num_groups: 8
+
+training:
+  batch_size: 8
+  learning_rate: 0.00039
+  epochs: 300
+  loss: "mse"
+  weight_decay: 1.6e-05
+  optimizer: "adam"
+  grad_clip: 0.0
+  scheduler: "cosine"
+  lr_min: 1.0e-6
+  early_stopping: true
+  es_patience: 30
+  num_workers: 0
+  device: "auto"
+
+output:
+  models_dir: "Articulo 1/Models"
+  results_dir: "results/resunetpp_v4_2p5m"
+  model_name: "resunetpp_v4_2p5m"

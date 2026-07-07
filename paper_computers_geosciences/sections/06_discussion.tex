@@ -1,0 +1,92 @@
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Pattern-aware metrics change the ranking}
+
+The headline finding of our study is methodological: \emph{how} a
+high-resolution snow model is evaluated can change which model one would
+select. Judged by \Rsq{} alone, the per-pixel Random Forest ($0.140$) is a
+strong second behind ResUNet++ ($0.208$), ahead of the U-Net ($0.054$). Judged
+by \SPAEF{}, the order of the two baselines \emph{reverses}: the U-Net ($0.186$)
+now ranks above the RF ($0.107$), and the gap between the RF and ResUNet++
+widens to nearly a factor of three, revealing that the RF reproduces the spatial
+pattern far worse than its \Rsq{} suggests. The discrepancy arises because
+\Rsq{} rewards getting the
+overall magnitude right and is dominated by the easy, smoothly varying part of
+the field, whereas \SPAEF{} jointly penalises errors in spatial correlation,
+dispersion and value distribution -- the components that encode the
+wind-driven drift structures of interest. For applications that depend on the
+\emph{location} of deep and shallow snow (avalanche release zones, meltwater
+routing, ecological niches), \SPAEF{}/\MSPAEF{} are the operationally relevant
+criteria, and we recommend reporting them alongside pixel-wise metrics in
+future high-resolution snow studies.
+
+\subsection{Architecture and spatial loss matter}
+
+Both CNNs share the same input stack, training protocol and Group Normalisation,
+so the contrast between them isolates the effect of the \emph{architecture}.
+Under these identical conditions the plain U-Net is highly unstable across seeds
+(\Rsq{}~$=0.054\pm0.124$, ranging from $-0.064$ to $0.184$), whereas ResUNet++ is
+both more accurate and far more reproducible (\Rsq{}~$=0.208\pm0.027$). We
+attribute this to the residual connections and the attention/ASPP blocks of
+ResUNet++, which provide a well-conditioned optimisation landscape -- the network
+can learn incrementally from an identity mapping and aggregate multi-scale
+context -- both critical with only 27 LiDAR dates, where a plain encoder--decoder
+is highly sensitive to initialisation. (We also note that Batch Normalisation,
+our first choice for the U-Net, was unusable here: its running statistics
+collapsed at evaluation under the small batches, which is why we use Group
+Normalisation in both networks.)
+
+The spatial loss further improves \emph{reproducibility}: the \Rsq{} standard
+deviation of ResUNet++ drops from $\pm0.112$ at $\lpear=0$ (pure MSE) to
+$\pm0.027$ at the optimum $\lpear=0.4$ (Table~\ref{tab:lambda}), a fourfold
+reduction in seed variance on top of the accuracy gain. In an operational
+setting where a single model must be trained and trusted, this stability is
+arguably as valuable as the accuracy itself.
+
+\subsection{What drives the prediction?}
+
+The ablation identifies snow persistence and 5\,m topography as the two
+indispensable predictor families, with the $S_x$ wind-sheltering indices and
+1\,m topography as secondary contributors. This is physically coherent:
+recent snow history is a strong autoregressive prior on current depth, and
+meso-scale terrain governs the wind redistribution that creates the dominant
+accumulation patterns at Izas. The near-redundancy of the instantaneous
+satellite SCE is explained by the persistence channels, which are themselves
+temporal aggregates of the same snow-cover product and carry the relevant
+information in a less noisy form.
+
+\subsection{Why meteorological forcing did not help}
+
+Adding temperature and accumulated-precipitation channels produced no
+significant improvement. We see two reasons. First, the meteorological inputs
+are \emph{scalar per date}: they shift the whole tile up or down but provide no
+spatial structure, so they can only help to the extent that the date-level
+snow magnitude is not already inferable from the snow-history channels -- which
+it largely is. Second, the small number of distinct acquisition dates limits
+the amount of temporal signal the network can exploit before over-fitting. A
+spatially distributed meteorological forcing (e.g.\ gridded temperature,
+incoming radiation or modelled wind fields) might carry complementary spatial
+information; we regard this as a promising direction rather than a negative
+result about meteorology per se.
+
+\subsection{Limitations}
+
+Several limitations temper our conclusions. (i) The benchmark is a single,
+small catchment; transferability to other terrains and snow climates remains to
+be demonstrated. (ii) The test set is a single, exceptionally snowy year; while
+this is a deliberate and demanding extrapolation test, it also inflates the
+seed variance and limits the precision of the absolute scores. The spatial-split
+experiment (Section~\ref{subsec:res_spatial}), where \Rsq{} roughly doubles to
+$0.409$, confirms that this temporal extrapolation -- rather than spatial
+generalisation -- is the dominant source of error. (iii) The number
+of LiDAR dates (27) is small by deep-learning standards, which constrains model
+capacity and amplifies initialisation sensitivity. (iv) The persistence
+channels treat clouds in the satellite snow-cover product as ``no-snow'', which
+may bias the recent-history estimate during prolonged cloudy periods; a
+cloud-aware temporal gap-filling could refine this input. (v) \MSPAEF{} is
+reported only as a complementary, bias-aware indicator; a systematic study of
+how it ranks models relative to \SPAEF{} is left for future work. Addressing
+these points -- multi-catchment training,
+more acquisition dates, distributed meteorological forcing and cloud-aware
+snow-history -- defines our future work.

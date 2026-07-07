@@ -1,0 +1,18 @@
+{
+  "experiment": "rf_v4_ms_sx200_s123",
+  "seed": 123,
+  "best_params": {
+    "n_estimators": 500,
+    "max_depth": 10,
+    "min_samples_leaf": 10,
+    "max_features": "sqrt",
+    "min_samples_split": 5
+  },
+  "test_metrics": {
+    "MAE": 0.5545,
+    "RMSE": 0.7181,
+    "R2": 0.0274,
+    "NSE": 0.0274,
+    "Bias": -0.3346
+  }
+}

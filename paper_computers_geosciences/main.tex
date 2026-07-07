@@ -1,0 +1,158 @@
+%=============================================================================
+%  High-resolution snow depth prediction in the Pyrenees with deep learning
+%  Target journal: Computers & Geosciences (Elsevier)
+%  Template: elsarticle
+%=============================================================================
+\documentclass[preprint,12pt]{elsarticle}
+
+% ---- Packages -------------------------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{siunitx}
+\usepackage{xcolor}
+\usepackage{subcaption}
+\usepackage[hidelinks]{hyperref}
+\usepackage{lineno}
+\modulolinenumbers[5]
+
+\graphicspath{{figures/}}
+
+% ---- Float placement (allow large figures near their reference) -----------
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.9}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.7}
+\setcounter{topnumber}{3}
+\setcounter{totalnumber}{4}
+
+% ---- Custom commands ------------------------------------------------------
+\newcommand{\SPAEF}{\textsc{SPAEF}}
+\newcommand{\MSPAEF}{\textsc{MSPAEF}}
+\newcommand{\Rsq}{$R^{2}$}
+\newcommand{\lpear}{\lambda}
+
+\journal{Computers \& Geosciences}
+
+\begin{document}
+
+\begin{frontmatter}
+
+\title{Spatially-aware deep learning for high-resolution snow depth
+mapping in a Pyrenean catchment: evaluating pattern fidelity with the
+\SPAEF{} metric}
+
+% ---- Authors --------------------------------------------------------------
+% TODO(before submission): replace the placeholder names, affiliation inst1
+% (lead author's university/department) and the corresponding-author e-mail
+% with the real values. J. Revuelto (IPE-CSIC) is the data-providing
+% collaborator and is kept as a real author.
+\author[inst1]{First Author\corref{cor1}}
+\author[inst1]{Second Author}
+\author[inst2]{Jes\'us Revuelto}
+\cortext[cor1]{Corresponding author. E-mail: author@institution.edu}
+
+\affiliation[inst1]{organization={Department / Research Group, University
+[PLACEHOLDER]},
+            city={City},
+            country={Spain}}
+\affiliation[inst2]{organization={Pyrenean Institute of Ecology (IPE),
+Spanish National Research Council (CSIC)},
+            city={Zaragoza},
+            country={Spain}}
+
+% ---- Abstract -------------------------------------------------------------
+\begin{abstract}
+Accurate, high-resolution snow depth (HS) mapping is essential for
+water-resource management and avalanche forecasting, yet remains challenging
+due to the strong spatial heterogeneity of the snowpack. We present a
+deep-learning framework that
+predicts HS at 1\,m resolution in the Izas experimental catchment (Central
+Spanish Pyrenees) from a multi-channel stack of topographic, snow-cover and
+wind-redistribution predictors derived from a 27-date airborne LiDAR
+time series (2021--2025). We benchmark a Random Forest (RF) baseline against
+two convolutional architectures (U-Net and ResUNet++) and show that
+conventional pixel-wise metrics (e.g.\ \Rsq{}) are insufficient to assess
+the predicted spatial patterns. We adopt the Spatial
+Efficiency metric (\SPAEF{}) and a modified, bias-aware variant (\MSPAEF{}) as
+complementary, pattern-oriented criteria, and introduce a hybrid
+spatial loss that combines pixel-wise mean squared error with a spatial
+correlation term weighted by a hyperparameter $\lpear$. Across three random
+seeds, ResUNet++ trained with the spatial loss ($\lpear=0.4$) achieves the
+best and most reproducible performance (\Rsq{}~$=0.208\pm0.027$,
+\SPAEF{}~$=0.297\pm0.018$), substantially outperforming both the per-pixel
+Random Forest (\SPAEF{}~$=0.107$) and a far less stable U-Net
+(\Rsq{}~$=0.054\pm0.124$), whose ranking reverses between \Rsq{} and
+\SPAEF{}. A leave-one-group-out ablation identifies
+fine-to-coarse topography (5\,m DEM derivatives) and snow persistence as the
+most informative predictors, whereas satellite snow-cover extent contributes
+marginally. Augmenting the input with meteorological forcing (temperature and
+accumulated precipitation) does not yield a statistically significant
+improvement, indicating that the topographic and snow-history signals already
+capture most of the explainable variance. Our results
+highlight the importance of pattern-aware metrics and losses for
+high-resolution snow mapping and provide a reproducible benchmark for future
+work.
+\end{abstract}
+
+% ---- Keywords -------------------------------------------------------------
+\begin{keyword}
+snow depth \sep deep learning \sep ResUNet++ \sep SPAEF \sep
+spatial loss \sep LiDAR \sep Pyrenees \sep Random Forest
+\end{keyword}
+
+\end{frontmatter}
+
+\linenumbers
+
+% ---- Highlights (Computers & Geosciences requirement) ---------------------
+% 3-5 bullets, each <= 85 characters incl. spaces.
+\section*{Highlights}
+\begin{itemize}\setlength{\itemsep}{0pt}
+  \item Deep learning maps 1\,m snow depth in a wind-swept Pyrenean catchment.
+  \item A hybrid MSE plus spatial-correlation loss sharpens predicted snow patterns.
+  \item SPAEF reveals spatial errors that $R^2$ alone overlooks in snow maps.
+  \item ResUNet++ beats a Random Forest and a plain U-Net over three seeds.
+  \item Coarse topography and snow persistence are the key input predictors.
+\end{itemize}
+
+% ---- Body -----------------------------------------------------------------
+\input{sections/01_introduction}
+\input{sections/02_related_work}
+\input{sections/03_study_area_data}
+\input{sections/04_methods}
+\input{sections/05_results}
+\input{sections/06_discussion}
+\input{sections/07_conclusions}
+
+% ---- Back matter ----------------------------------------------------------
+\section*{Code and data availability}
+The dataset, trained model weights and the code required to reproduce all
+experiments will be made available in a public repository (Zenodo / GitHub)
+upon acceptance.
+
+\section*{CRediT authorship contribution statement}
+% TODO(before submission): replace placeholder names with the real authors.
+\textbf{First Author:} Conceptualization, Methodology, Software, Formal
+analysis, Investigation, Data curation, Writing -- original draft,
+Visualization. \textbf{Second Author:} Methodology, Software, Validation,
+Writing -- review \& editing. \textbf{Jes\'us Revuelto:} Resources, Data
+curation, Writing -- review \& editing, Supervision.
+
+\section*{Acknowledgements}
+The authors thank the Pyrenean Institute of Ecology (IPE--CSIC) for
+providing the LiDAR and meteorological data of the Izas experimental
+catchment. [PLACEHOLDER: funding grants.]
+
+\section*{Declaration of competing interest}
+The authors declare that they have no known competing financial interests or
+personal relationships that could have appeared to influence the work
+reported in this paper.
+
+\bibliographystyle{elsarticle-num}
+\bibliography{refs}
+
+\end{document}

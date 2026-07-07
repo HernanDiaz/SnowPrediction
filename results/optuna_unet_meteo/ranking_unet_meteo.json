@@ -1,0 +1,97 @@
+[
+  {
+    "rank": 1,
+    "trial": 2,
+    "val_loss": 0.690249,
+    "test_R2": -0.131,
+    "test_MAE": 0.5872,
+    "test_RMSE": 0.7744,
+    "test_Bias": -0.528,
+    "n_params": 1956321,
+    "params": {
+      "base_channels": 32,
+      "dropout_p": 0.03668090197068676,
+      "lr": 7.060886961125452e-05,
+      "weight_decay": 6.166429004428987e-05,
+      "batch_size": 8,
+      "optimizer": "adam",
+      "grad_clip": 1.0
+    }
+  },
+  {
+    "rank": 2,
+    "trial": 3,
+    "val_loss": 0.674957,
+    "test_R2": -0.1395,
+    "test_MAE": 0.6092,
+    "test_RMSE": 0.7773,
+    "test_Bias": -0.4099,
+    "n_params": 4392913,
+    "params": {
+      "base_channels": 48,
+      "dropout_p": 0.10284688768272232,
+      "lr": 0.00015884086920668207,
+      "weight_decay": 6.245235667030334e-06,
+      "batch_size": 8,
+      "optimizer": "adamw",
+      "grad_clip": 0.0
+    }
+  },
+  {
+    "rank": 3,
+    "trial": 4,
+    "val_loss": 0.805176,
+    "test_R2": -0.233,
+    "test_MAE": 0.6292,
+    "test_RMSE": 0.8085,
+    "test_Bias": -0.5786,
+    "n_params": 7801793,
+    "params": {
+      "base_channels": 64,
+      "dropout_p": 0.08803049874792027,
+      "lr": 4.228959435391992e-05,
+      "weight_decay": 5.3522026572534144e-05,
+      "batch_size": 16,
+      "optimizer": "adamw",
+      "grad_clip": 1.0
+    }
+  },
+  {
+    "rank": 4,
+    "trial": 1,
+    "val_loss": 0.803633,
+    "test_R2": -0.4282,
+    "test_MAE": 0.6912,
+    "test_RMSE": 0.8702,
+    "test_Bias": -0.5862,
+    "n_params": 4392913,
+    "params": {
+      "base_channels": 48,
+      "dropout_p": 0.11973169683940732,
+      "lr": 4.6532076719359355e-05,
+      "weight_decay": 1.0551419392679564e-05,
+      "batch_size": 16,
+      "optimizer": "adamw",
+      "grad_clip": 1.0
+    }
+  },
+  {
+    "rank": 5,
+    "trial": 0,
+    "val_loss": 0.765724,
+    "test_R2": -0.4468,
+    "test_MAE": 0.6847,
+    "test_RMSE": 0.8758,
+    "test_Bias": -0.5643,
+    "n_params": 4392913,
+    "params": {
+      "base_channels": 48,
+      "dropout_p": 0.0012,
+      "lr": 3.064e-05,
+      "weight_decay": 2.149e-05,
+      "batch_size": 16,
+      "optimizer": "adam",
+      "grad_clip": 1.0
+    }
+  }
+]

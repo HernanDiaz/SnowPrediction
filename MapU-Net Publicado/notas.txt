@@ -1,0 +1,10 @@
+cambios:
+pagina 25 seccion 5.4. Varios cambios: Añado datos de test y cambio el orden del experimento.
+
+pagina 25 5.5 : Explicado que el analisis se hace en test: analysis of the error distribution on Test
+
+Sección 5.5.2 cambiado resultados MAE en validacion por mae en test en dos sitios
+
+Seccion nueva: Spatial and Temporal Generalization Capabilities
+
+Conclusiones: cambiado resultados MAE en validacion por mae en test

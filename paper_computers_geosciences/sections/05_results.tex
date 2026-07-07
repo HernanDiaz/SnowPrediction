@@ -1,0 +1,320 @@
+\section{Results}
+\label{sec:results}
+
+All results are reported on the temporally disjoint 2025 test set, averaged
+over three seeds (mean $\pm$ standard deviation) unless stated otherwise.
+
+\subsection{Model comparison: RF vs.\ U-Net vs.\ ResUNet++}
+\label{subsec:res_comparison}
+
+Table~\ref{tab:comparison} and Fig.~\ref{fig:comparison} compare the three
+models on the 22-channel
+dataset. ResUNet++ trained with the optimal spatial loss ($\lpear=0.4$,
+Section~\ref{subsec:res_lambda}) attains the best scores on every metric:
+\Rsq{}~$=0.208\pm0.027$ and \SPAEF{}~$=0.297\pm0.018$. The Random Forest is a
+solid baseline in terms of \Rsq{} ($0.140\pm0.004$) and is remarkably stable,
+but its spatial pattern fidelity is poor (\SPAEF{}~$=0.107$): operating
+per-pixel, it cannot reproduce the coherent drift structures of the snowpack.
+
+The plain U-Net (with Group Normalisation, as in ResUNet++, so that the two
+share the same normalisation; see Section~\ref{subsec:models}) is, by contrast,
+highly unstable across seeds: its \Rsq{} is $0.054\pm0.124$ -- a standard
+deviation more than twice the mean -- ranging from $-0.064$ to $0.184$, the
+latter approaching ResUNet++. Its variance is an order of magnitude larger than
+that of ResUNet++ ($\pm0.027$) and of the RF ($\pm0.004$), so a single run could
+easily be mistaken for either a failure or a near-state-of-the-art result.
+
+The most instructive comparison is between the U-Net and the RF, whose ranking
+\emph{reverses} depending on the metric. By \Rsq{} the per-pixel RF ($0.140$)
+clearly leads the U-Net ($0.054$); by \SPAEF{} the order flips, with the U-Net
+($0.186$) ahead of the RF ($0.107$). The CNN, even when it lags in pixel-wise
+accuracy, reproduces the spatial \emph{pattern} of the snowpack better than the
+RF, which operates per pixel and over-smooths the field. This metric-dependent
+reversal is precisely the kind of effect that an \Rsq{}-only evaluation would
+miss, and it motivates our use of pattern-aware metrics and a multi-seed
+protocol. ResUNet++ remains the best model on every metric and by far the most
+reproducible.
+
+Figure~\ref{fig:maps} illustrates these differences qualitatively on a
+representative 2025 test tile: both ResUNet++ and the U-Net recover the
+wind-driven accumulation bands, sharper and closer to the LiDAR reference than
+the Random Forest, which yields a smoother, washed-out field -- consistent with
+the much lower \SPAEF{} of the per-pixel baseline.
+
+\begin{table}[t]
+  \centering
+  \caption{Model comparison on the 22-channel dataset (2025 test set, mean
+  $\pm$ std over seeds 42/123/7). All CNNs are evaluated at their
+  best-validation epoch (see Section~\ref{subsec:protocol}). Best value per
+  column in bold. \SPAEF{} for RF is computed by reassembling per-pixel
+  predictions into tiles.}
+  \label{tab:comparison}
+  \small
+  \begin{tabular}{lcccccc}
+    \toprule
+    Model & \Rsq{}$\uparrow$ & \SPAEF{}$\uparrow$ & MAE$\downarrow$ &
+    RMSE$\downarrow$ & Bias & \Rsq{} std \\
+    \midrule
+    Random Forest         & $0.140$ & $0.107$ & $0.515$ & $0.675$ & $-0.307$ & $\pm0.004$ \\
+    U-Net (GroupNorm)     & $0.054$ & $0.186$ & $0.536$ & $0.707$ & $-0.333$ & $\pm0.124$ \\
+    \textbf{ResUNet++} ($\lpear{=}0.4$) & $\mathbf{0.208}$ & $\mathbf{0.297}$ &
+    $\mathbf{0.477}$ & $\mathbf{0.648}$ & $\mathbf{-0.282}$ & $\pm0.027$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[t]
+  \centering
+  \caption{Per-seed \Rsq{} and \SPAEF{}, illustrating the seed-to-seed
+  (in)stability of each model.}
+  \label{tab:perseed}
+  \small
+  \begin{tabular}{lcccccc}
+    \toprule
+    & \multicolumn{3}{c}{\Rsq{}} & \multicolumn{3}{c}{\SPAEF{}} \\
+    \cmidrule(lr){2-4}\cmidrule(lr){5-7}
+    Model & s42 & s123 & s7 & s42 & s123 & s7 \\
+    \midrule
+    Random Forest & $0.140$ & $0.136$ & $0.144$ & $0.104$ & $0.110$ & $0.108$ \\
+    U-Net (GroupNorm) & $0.042$ & $-0.064$ & $0.184$ & $0.161$ & $0.094$ & $0.304$ \\
+    ResUNet++ ($\lpear{=}0.4$) & $0.186$ & $0.200$ & $0.239$ & $0.294$ & $0.281$ & $0.317$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{fig04_model_comparison.pdf}
+  \caption{Model comparison on the 2025 test set. Bars show the mean over three
+  seeds and error bars the standard deviation, for \Rsq{} (left) and \SPAEF{}
+  (right). ResUNet++ ($\lpear{=}0.4$) dominates on both metrics. Note the
+  reversal between the RF and the U-Net: the RF leads on \Rsq{} but the U-Net
+  leads on \SPAEF{}; the U-Net also shows by far the largest seed variance.}
+  \label{fig:comparison}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{fig05_prediction_maps.pdf}
+  \caption{Qualitative comparison of predicted snow-depth maps for a
+  representative 2025 test tile. From left to right: LiDAR ground truth, Random
+  Forest, U-Net (GroupNorm) and ResUNet++ ($\lpear{=}0.4$). The two CNNs
+  reproduce the wind-driven accumulation bands, whereas the Random Forest
+  produces a smoother, lower-contrast field. White pixels are masked (no valid
+  LiDAR return); all panels share the colour scale.}
+  \label{fig:maps}
+\end{figure}
+
+\subsection{Spatial-loss weight sweep}
+\label{subsec:res_lambda}
+
+Table~\ref{tab:lambda} and Fig.~\ref{fig:lambda} report the effect of the
+spatial-loss weight $\lpear$ on ResUNet++. Both \Rsq{} and \SPAEF{} follow a
+clear concave trend: starting from pure MSE ($\lpear=0$), adding a moderate
+amount of spatial correlation improves performance up to an optimum at
+$\lpear=0.4$, after which over-weighting the pattern term (towards
+$\lpear=1.0$, i.e.\ pure correlation) degrades both metrics. At the optimum,
+\Rsq{} rises from $0.139\pm0.111$ ($\lpear=0$) to $0.208\pm0.027$, and
+\SPAEF{} from $0.212\pm0.123$ to $0.297\pm0.018$ -- the spatial loss not only
+improves the mean but also \emph{halves} (in fact reduces by ${\sim}80\%$) the
+seed-to-seed variance, making training markedly more reproducible.
+
+\begin{table}[t]
+  \centering
+  \caption{Spatial-loss weight sweep for ResUNet++ on the 22-channel dataset
+  (mean $\pm$ std over seeds 42/123/7). The optimum is $\lpear=0.4$ for both
+  metrics, which also yields the lowest variance.}
+  \label{tab:lambda}
+  \small
+  \begin{tabular}{lcccc}
+    \toprule
+    $\lpear$ & \Rsq{} & \Rsq{} std & \SPAEF{} & \SPAEF{} std \\
+    \midrule
+    0.00 & $0.139$ & $\pm0.111$ & $0.212$ & $\pm0.123$ \\
+    0.10 & $0.173$ & $\pm0.025$ & $0.267$ & $\pm0.018$ \\
+    0.25 & $0.152$ & $\pm0.079$ & $0.272$ & $\pm0.034$ \\
+    \textbf{0.40} & $\mathbf{0.208}$ & $\pm0.027$ & $\mathbf{0.297}$ & $\pm0.018$ \\
+    0.50 & $0.203$ & $\pm0.019$ & $0.288$ & $\pm0.010$ \\
+    0.60 & $0.145$ & $\pm0.045$ & $0.235$ & $\pm0.032$ \\
+    0.75 & $0.181$ & $\pm0.076$ & $0.278$ & $\pm0.043$ \\
+    1.00 & $0.119$ & $\pm0.035$ & $0.194$ & $\pm0.060$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\linewidth]{fig06_lambda_sweep.pdf}
+  \caption{Effect of the spatial-loss weight $\lpear$ on ResUNet++. Curves show
+  the mean \Rsq{} and \SPAEF{} over three seeds with $\pm1$ std error bars.
+  Both metrics peak at $\lpear=0.4$ (dashed line); the error bars also contract
+  around the optimum, indicating improved reproducibility.}
+  \label{fig:lambda}
+\end{figure}
+
+\subsection{Channel ablation}
+\label{subsec:res_ablation}
+
+To quantify the contribution of each predictor family we perform a
+leave-one-group-out ablation on ResUNet++, removing one channel family at a
+time and retraining from scratch (three seeds each). Table~\ref{tab:ablation}
+and Fig.~\ref{fig:ablation} report the resulting test scores; larger drops
+relative to the full model indicate more important channels.
+
+Two families are critical. Removing the 5\,m (coarse) topography collapses the
+model to \Rsq{}~$=-0.114$ and \SPAEF{}~$=0.076$, and removing the snow
+persistence channels is equally damaging (\Rsq{}~$=-0.148$,
+\SPAEF{}~$=0.129$). This confirms that meso-scale terrain context and recent
+snow history are the backbone of the prediction. The $S_x$ wind-sheltering
+channels and the 1\,m topography are moderately important, while the
+instantaneous satellite snow-cover extent (SCE) is nearly redundant -- its
+removal leaves \Rsq{} essentially unchanged and even reduces variance,
+consistent with the persistence channels already encoding the relevant
+snow-cover information.
+
+\begin{table}[t]
+  \centering
+  \caption{Leave-one-group-out channel ablation for ResUNet++ (22-channel
+  full model, mean $\pm$ std over three seeds). Rows are sorted by impact;
+  the largest degradations (most important channels) are at the top.}
+  \label{tab:ablation}
+  \small
+  \begin{tabular}{lcc}
+    \toprule
+    Configuration & \Rsq{} & \SPAEF{} \\
+    \midrule
+    Full (22 channels)          & $0.132\pm0.112$ & $0.251\pm0.051$ \\
+    \midrule
+    $-$ Snow persistence        & $-0.148\pm0.113$ & $0.129\pm0.026$ \\
+    $-$ Topography 5\,m         & $-0.114\pm0.119$ & $0.076\pm0.080$ \\
+    $-$ $S_x$ wind sheltering   & $0.089\pm0.097$  & $0.225\pm0.044$ \\
+    $-$ Topography 1\,m         & $0.079\pm0.092$  & $0.220\pm0.048$ \\
+    $-$ SCE (snow-cover extent) & $0.132\pm0.027$  & $0.242\pm0.022$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\linewidth]{fig07_ablation.pdf}
+  \caption{Channel-family ablation for ResUNet++. Bars show the test \Rsq{}
+  and \SPAEF{} obtained when each predictor family is removed (mean $\pm$ std
+  over three seeds); dashed lines mark the full 22-channel model. Removing snow
+  persistence or 5\,m topography drives \Rsq{} below zero, identifying them as
+  the most influential predictors, whereas SCE is nearly redundant.}
+  \label{fig:ablation}
+\end{figure}
+
+\noindent\textit{Note.} The ablation is performed at $\lpear=0$ (pure MSE) so
+that all configurations are compared under identical, loss-neutral conditions;
+the full-model baseline in Table~\ref{tab:ablation} therefore corresponds to
+the $\lpear=0$ row of Table~\ref{tab:lambda} and is lower than the
+$\lpear=0.4$ optimum used elsewhere.
+
+\subsection{Meteorological channels (extended configuration)}
+\label{subsec:res_meteo}
+
+Finally, we test whether adding explicit meteorological forcing improves
+prediction. Table~\ref{tab:meteo} compares the best 22-channel ResUNet++
+($\lpear=0.4$) with the 26-channel configuration that adds the four
+temperature/precipitation channels; for the latter the best operating point of
+the $\lpear$ sweep was $\lpear=0.6$. The two configurations are
+statistically indistinguishable on the central metrics: the 26-channel model is
+marginally better on \Rsq{} ($0.213$ vs.\ $0.208$) and the 22-channel model is
+marginally better on \SPAEF{} ($0.297$ vs.\ $0.283$), with overlapping
+standard deviations on every metric. Moreover, the 22-channel model is
+\emph{more stable} (\Rsq{} std $\pm0.027$ vs.\ $\pm0.054$). This holds across
+the whole spatial-loss sweep (Fig.~\ref{fig:meteo}): the two configurations
+track each other within the seed variance at every $\lpear$, and the
+meteo-augmented model is generally the more erratic of the two.
+
+We conclude that, for this catchment and predictor set, the topographic and
+snow-history channels already capture most of the explainable variance, and
+the scalar (spatially uniform) meteorological channels add little
+complementary spatial information. We therefore retain the 22-channel
+configuration as our reference model and report the meteorological experiment
+as a complementary analysis.
+
+\begin{table}[t]
+  \centering
+  \caption{Effect of adding meteorological channels. Best 22-channel ResUNet++
+  ($\lpear{=}0.4$) vs.\ best 26-channel configuration ($\lpear{=}0.6$); mean
+  $\pm$ std over three seeds.}
+  \label{tab:meteo}
+  \small
+  \begin{tabular}{lcccccc}
+    \toprule
+    Configuration & \Rsq{} & \SPAEF{} & \MSPAEF{} & MAE & RMSE & \Rsq{} std \\
+    \midrule
+    22-ch ($\lpear{=}0.4$) & $0.208$ & $\mathbf{0.297}$ & $0.462$ & $0.477$ & $0.648$ & $\mathbf{\pm0.027}$ \\
+    26-ch ($\lpear{=}0.6$) & $\mathbf{0.213}$ & $0.283$ & $\mathbf{0.463}$ & $0.480$ & $\mathbf{0.646}$ & $\pm0.054$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{fig08_meteo.pdf}
+  \caption{Comparison of the 22-channel and 26-channel (with meteorological
+  forcing) ResUNet++ configurations across the spatial-loss weight $\lpear$:
+  \Rsq{} (left) and \SPAEF{} (right), mean $\pm$ std over three seeds.
+  Differences fall within the seed variance at every $\lpear$, indicating no
+  significant benefit from the added meteorological channels.}
+  \label{fig:meteo}
+\end{figure}
+
+\subsection{Spatial vs.\ temporal generalisation}
+\label{subsec:res_spatial}
+
+All results so far use the temporal split, which tests the hardest and most
+operationally relevant scenario: extrapolation to an unseen -- and anomalously
+snowy -- year. To disentangle this temporal difficulty from the model's ability
+to generalise in space, we re-evaluate the reference ResUNet++ ($\lpear=0.4$) on
+a purely \emph{spatial} split of the same tiles. The catchment is partitioned
+into three contiguous bands along the easting (Fig.~\ref{fig:spatial_split});
+because the $256$\,m tiles overlap by $50\%$ (a $128$\,m stride), the tiles that
+straddle a band boundary are dropped, leaving a $\geq256$\,m buffer so that no
+pixel is shared between splits. Every spatial location is assigned to a single
+split across all dates, so the model is trained and tested on the same years
+(2021--2025) but on disjoint \emph{locations}.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.62\linewidth]{fig09_spatial_split.pdf}
+  \caption{Spatial train/validation/test split of the Izas tiles. Each marker is
+  a tile location; the three contiguous easting bands are separated by a dropped
+  buffer (grey, dashed boundaries) that removes all overlap between splits.
+  Every location keeps the same split across all acquisition dates, so the split
+  is purely spatial.}
+  \label{fig:spatial_split}
+\end{figure}
+
+Table~\ref{tab:spatial} compares the two regimes. Under the spatial split the
+model is markedly more accurate: \Rsq{} roughly doubles
+($0.409\pm0.026$ vs.\ $0.208\pm0.027$), \SPAEF{} rises to $0.448$ and \MSPAEF{}
+to $0.723$, and the negative bias shrinks ($-0.211$ vs.\ $-0.282$). The MAE and
+RMSE are slightly higher because the spatial test set spans every year,
+including the deep-snow 2025 magnitudes, but the fraction of variance explained
+is far larger. The seed variance remains small ($\pm0.026$), confirming that the
+instability seen elsewhere is tied to the temporal extrapolation rather than to
+the architecture. In short, the model generalises well across \emph{space};
+the dominant source of error is the temporal extrapolation to an atypical year,
+which we therefore retain as our primary, more demanding benchmark.
+
+\begin{table}[t]
+  \centering
+  \caption{Reference ResUNet++ ($\lpear{=}0.4$) under the temporal and the
+  spatial split (2025 vs.\ unseen-locations test set; mean $\pm$ std over seeds
+  42/123/7). The spatial split, which keeps all years in training, is
+  substantially easier.}
+  \label{tab:spatial}
+  \small
+  \begin{tabular}{lcccccc}
+    \toprule
+    Split & \Rsq{} & \SPAEF{} & \MSPAEF{} & MAE & RMSE & Bias \\
+    \midrule
+    Temporal (2025)      & $0.208\pm0.027$ & $0.297\pm0.018$ & $0.462$ & $0.477$ & $0.648$ & $-0.282$ \\
+    Spatial (locations)  & $0.409\pm0.026$ & $0.448\pm0.023$ & $0.723$ & $0.486$ & $0.693$ & $-0.211$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}

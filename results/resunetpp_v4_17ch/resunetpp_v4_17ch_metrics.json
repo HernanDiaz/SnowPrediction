@@ -1,0 +1,14 @@
+{
+  "experiment": "resunetpp_v4_17ch",
+  "timestamp": "2026-04-28 22:58:48",
+  "n_pixels": 11933976,
+  "tta": false,
+  "MAE": 0.5256,
+  "RMSE": 0.7014,
+  "R2": 0.072,
+  "NSE": 0.072,
+  "Bias": -0.3313,
+  "SPAEF": 0.1796,
+  "SPAEF_std": 0.4212,
+  "SPAEF_n_tiles": 220
+}

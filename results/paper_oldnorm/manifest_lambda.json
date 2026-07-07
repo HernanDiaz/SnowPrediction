@@ -1,0 +1,246 @@
+[
+  {
+    "exp": "sp00_s42",
+    "lam": 0.0,
+    "seed": 42,
+    "stored_R2": 0.244,
+    "stored_SPAEF": 0.2984,
+    "weight": "Articulo 1/Models/resunetpp_v4_ms_sx200_hpo.pth",
+    "source_metrics": "results\\resunetpp_v4_ms_sx200_hpo\\resunetpp_v4_ms_sx200_hpo_metrics.json",
+    "reproduces_oldnorm": true
+  },
+  {
+    "exp": "sp00_s123",
+    "lam": 0.0,
+    "seed": 123,
+    "stored_R2": 0.1509,
+    "stored_SPAEF": 0.2676,
+    "weight": "Articulo 1/Models/resunetpp_hpo_sp00_s123.pth",
+    "source_metrics": "results\\lambda_sweep_hpo\\resunetpp_hpo_sp00_s123\\resunetpp_hpo_sp00_s123_metrics.json",
+    "reproduces_oldnorm": false,
+    "repro_oldnorm_R2": -0.36,
+    "repro_oldnorm_SPAEF": -0.313
+  },
+  {
+    "exp": "sp00_s7",
+    "lam": 0.0,
+    "seed": 7,
+    "stored_R2": 0.0217,
+    "stored_SPAEF": 0.0705,
+    "weight": "Articulo 1/Models/resunetpp_hpo_sp00_s7.pth",
+    "source_metrics": "results\\lambda_sweep_hpo\\resunetpp_hpo_sp00_s7\\resunetpp_hpo_sp00_s7_metrics.json",
+    "reproduces_oldnorm": false,
+    "repro_oldnorm_R2": -0.287,
+    "repro_oldnorm_SPAEF": -0.251
+  },
+  {
+    "exp": "sp01_s42",
+    "lam": 0.1,
+    "seed": 42,
+    "stored_R2": 0.1772,
+    "stored_SPAEF": 0.2444,
+    "weight": "Articulo 1/Models/resunetpp_v4_ms_sx200_hpo_sp01.pth",
+    "source_metrics": "results\\resunetpp_v4_ms_sx200_hpo_sp01\\resunetpp_v4_ms_sx200_hpo_sp01_metrics.json",
+    "reproduces_oldnorm": true
+  },
+  {
+    "exp": "sp01_s123",
+    "lam": 0.1,
+    "seed": 123,
+    "stored_R2": 0.1413,
+    "stored_SPAEF": 0.2884,
+    "weight": "Articulo 1/Models/resunetpp_hpo_sp01_s123.pth",
+    "source_metrics": "results\\lambda_sweep_hpo\\resunetpp_hpo_sp01_s123\\resunetpp_hpo_sp01_s123_metrics.json",
+    "reproduces_oldnorm": true
+  },
+  {
+    "exp": "sp01_s7",
+    "lam": 0.1,
+    "seed": 7,
+    "stored_R2": 0.2019,
+    "stored_SPAEF": 0.2676,
+    "weight": "Articulo 1/Models/resunetpp_hpo_sp01_s7.pth",
+    "source_metrics": "results\\lambda_sweep_hpo\\resunetpp_hpo_sp01_s7\\resunetpp_hpo_sp01_s7_metrics.json",
+    "reproduces_oldnorm": true
+  },
+  {
+    "exp": "sp025_s42",
+    "lam": 0.25,
+    "seed": 42,
+    "stored_R2": 0.2622,
+    "stored_SPAEF": 0.3109,
+    "weight": "Articulo 1/Models/resunetpp_v4_ms_sx200_hpo_sp025.pth",
+    "source_metrics": "results\\resunetpp_v4_ms_sx200_hpo_sp025\\resunetpp_v4_ms_sx200_hpo_sp025_metrics.json",
+    "reproduces_oldnorm": true
+  },
+  {
+    "exp": "sp025_s123",
+    "lam": 0.25,
+    "seed": 123,
+    "stored_R2": 0.0839,
+    "stored_SPAEF": 0.2773,
+    "weight": "Articulo 1/Models/resunetpp_hpo_sp025_s123.pth",
+    "source_metrics": "results\\lambda_sweep_hpo\\resunetpp_hpo_sp025_s123\\resunetpp_hpo_sp025_s123_metrics.json",
+    "reproduces_oldnorm": true
+  },
+  {
+    "exp": "sp025_s7",
+    "lam": 0.25,
+    "seed": 7,
+    "stored_R2": 0.1102,
+    "stored_SPAEF": 0.2285,
+    "weight": "Articulo 1/Models/resunetpp_hpo_sp025_s7.pth",
+    "source_metrics": "results\\lambda_sweep_hpo\\resunetpp_hpo_sp025_s7\\resunetpp_hpo_sp025_s7_metrics.json",
+    "reproduces_oldnorm": true
+  },
+  {
+    "exp": "sp04_s42",
+    "lam": 0.4,
+    "seed": 42,
+    "stored_R2": 0.1863,
+    "stored_SPAEF": 0.2944,
+    "weight": "Articulo 1/Models/resunetpp_v4_ms_sx200_hpo_sp04.pth",
+    "source_metrics": "results\\resunetpp_v4_ms_sx200_hpo_sp04\\resunetpp_v4_ms_sx200_hpo_sp04_metrics.json",
+    "reproduces_oldnorm": true
+  },
+  {
+    "exp": "sp04_s123",
+    "lam": 0.4,
+    "seed": 123,
+    "stored_R2": 0.1995,
+    "stored_SPAEF": 0.2808,
+    "weight": "Articulo 1/Models/resunetpp_hpo_sp04_s123.pth",
+    "source_metrics": "results\\lambda_sweep_hpo\\resunetpp_hpo_sp04_s123\\resunetpp_hpo_sp04_s123_metrics.json",
+    "reproduces_oldnorm": true
+  },
+  {
+    "exp": "sp04_s7",
+    "lam": 0.4,
+    "seed": 7,
+    "stored_R2": 0.2386,
+    "stored_SPAEF": 0.3166,
+    "weight": "Articulo 1/Models/resunetpp_hpo_sp04_s7.pth",
+    "source_metrics": "results\\lambda_sweep_hpo\\resunetpp_hpo_sp04_s7\\resunetpp_hpo_sp04_s7_metrics.json",
+    "reproduces_oldnorm": true
+  },
+  {
+    "exp": "sp05_s42",
+    "lam": 0.5,
+    "seed": 42,
+    "stored_R2": 0.2099,
+    "stored_SPAEF": 0.2935,
+    "weight": "Articulo 1/Models/resunetpp_v4_ms_sx200_hpo_sp05.pth",
+    "source_metrics": "results\\resunetpp_v4_ms_sx200_hpo_sp05\\resunetpp_v4_ms_sx200_hpo_sp05_metrics.json",
+    "reproduces_oldnorm": true
+  },
+  {
+    "exp": "sp05_s123",
+    "lam": 0.5,
+    "seed": 123,
+    "stored_R2": 0.2216,
+    "stored_SPAEF": 0.2966,
+    "weight": "Articulo 1/Models/resunetpp_hpo_sp05_s123.pth",
+    "source_metrics": "results\\lambda_sweep_hpo\\resunetpp_hpo_sp05_s123\\resunetpp_hpo_sp05_s123_metrics.json",
+    "reproduces_oldnorm": true
+  },
+  {
+    "exp": "sp05_s7",
+    "lam": 0.5,
+    "seed": 7,
+    "stored_R2": 0.1762,
+    "stored_SPAEF": 0.2747,
+    "weight": "Articulo 1/Models/resunetpp_hpo_sp05_s7.pth",
+    "source_metrics": "results\\lambda_sweep_hpo\\resunetpp_hpo_sp05_s7\\resunetpp_hpo_sp05_s7_metrics.json",
+    "reproduces_oldnorm": true
+  },
+  {
+    "exp": "sp06_s42",
+    "lam": 0.6,
+    "seed": 42,
+    "stored_R2": 0.0833,
+    "stored_SPAEF": 0.191,
+    "weight": "Articulo 1/Models/resunetpp_v4_ms_sx200_hpo_sp06.pth",
+    "source_metrics": "results\\resunetpp_v4_ms_sx200_hpo_sp06\\resunetpp_v4_ms_sx200_hpo_sp06_metrics.json",
+    "reproduces_oldnorm": true
+  },
+  {
+    "exp": "sp06_s123",
+    "lam": 0.6,
+    "seed": 123,
+    "stored_R2": 0.1909,
+    "stored_SPAEF": 0.2689,
+    "weight": "Articulo 1/Models/resunetpp_hpo_sp06_s123.pth",
+    "source_metrics": "results\\lambda_sweep_hpo\\resunetpp_hpo_sp06_s123\\resunetpp_hpo_sp06_s123_metrics.json",
+    "reproduces_oldnorm": true
+  },
+  {
+    "exp": "sp06_s7",
+    "lam": 0.6,
+    "seed": 7,
+    "stored_R2": 0.1621,
+    "stored_SPAEF": 0.2437,
+    "weight": "Articulo 1/Models/resunetpp_hpo_sp06_s7.pth",
+    "source_metrics": "results\\lambda_sweep_hpo\\resunetpp_hpo_sp06_s7\\resunetpp_hpo_sp06_s7_metrics.json",
+    "reproduces_oldnorm": true
+  },
+  {
+    "exp": "sp075_s42",
+    "lam": 0.75,
+    "seed": 42,
+    "stored_R2": 0.2501,
+    "stored_SPAEF": 0.3292,
+    "weight": "Articulo 1/Models/resunetpp_v4_ms_sx200_hpo_sp075.pth",
+    "source_metrics": "results\\resunetpp_v4_ms_sx200_hpo_sp075\\resunetpp_v4_ms_sx200_hpo_sp075_metrics.json",
+    "reproduces_oldnorm": true
+  },
+  {
+    "exp": "sp075_s123",
+    "lam": 0.75,
+    "seed": 123,
+    "stored_R2": 0.216,
+    "stored_SPAEF": 0.2826,
+    "weight": "Articulo 1/Models/resunetpp_hpo_sp075_s123.pth",
+    "source_metrics": "results\\lambda_sweep_hpo\\resunetpp_hpo_sp075_s123\\resunetpp_hpo_sp075_s123_metrics.json",
+    "reproduces_oldnorm": true
+  },
+  {
+    "exp": "sp075_s7",
+    "lam": 0.75,
+    "seed": 7,
+    "stored_R2": 0.0756,
+    "stored_SPAEF": 0.2236,
+    "weight": "Articulo 1/Models/resunetpp_hpo_sp075_s7.pth",
+    "source_metrics": "results\\lambda_sweep_hpo\\resunetpp_hpo_sp075_s7\\resunetpp_hpo_sp075_s7_metrics.json",
+    "reproduces_oldnorm": true
+  },
+  {
+    "exp": "sp10_s42",
+    "lam": 1.0,
+    "seed": 42,
+    "stored_R2": 0.1687,
+    "stored_SPAEF": 0.2631,
+    "weight": "Articulo 1/Models/resunetpp_v4_ms_sx200_hpo_sp10.pth",
+    "source_metrics": "results\\resunetpp_v4_ms_sx200_hpo_sp10\\resunetpp_v4_ms_sx200_hpo_sp10_metrics.json",
+    "reproduces_oldnorm": true
+  },
+  {
+    "exp": "sp10_s123",
+    "lam": 1.0,
+    "seed": 123,
+    "stored_R2": 0.0964,
+    "stored_SPAEF": 0.2036,
+    "weight": "Articulo 1/Models/resunetpp_hpo_sp10_s123.pth",
+    "source_metrics": "results\\lambda_sweep_hpo\\resunetpp_hpo_sp10_s123\\resunetpp_hpo_sp10_s123_metrics.json",
+    "reproduces_oldnorm": true
+  },
+  {
+    "exp": "sp10_s7",
+    "lam": 1.0,
+    "seed": 7,
+    "stored_R2": 0.0931,
+    "stored_SPAEF": 0.1159,
+    "weight": "Articulo 1/Models/resunetpp_hpo_sp10_s7.pth",
+    "source_metrics": "results\\lambda_sweep_hpo\\resunetpp_hpo_sp10_s7\\resunetpp_hpo_sp10_s7_metrics.json",
+    "reproduces_oldnorm": true
+  }
+]

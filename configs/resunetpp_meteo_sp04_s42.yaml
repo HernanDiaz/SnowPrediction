@@ -1,0 +1,39 @@
+experiment:
+  name: resunetpp_meteo_sp04_s42
+data:
+  root: dataset_v4_ms_sx200_meteo
+  csv_file: dataset_v4_ms_sx200_meteo.csv
+  images_dir: images
+  masks_dir: masks
+  source: lidar
+  split_type: temporal
+  use_sce: false
+  augmentation: false
+model:
+  architecture: resunetpp
+  in_channels: 26
+  out_channels: 1
+  features:
+  - 48
+  - 96
+  - 192
+  - 384
+  dropout_p: 0.11973169683940732
+  num_groups: 8
+training:
+  seed: 42
+  batch_size: 8
+  learning_rate: 4.653e-05
+  epochs: 50
+  loss: spatial_mse
+  lambda_pearson: 0.4
+  weight_decay: 1.055e-05
+  optimizer: adamw
+  grad_clip: 1.0
+  early_stopping: false
+  num_workers: 0
+  device: auto
+output:
+  models_dir: Articulo 1/Models
+  results_dir: results/lambda_sweep_meteo/resunetpp_meteo_sp04_s42
+  model_name: resunetpp_meteo_sp04_s42

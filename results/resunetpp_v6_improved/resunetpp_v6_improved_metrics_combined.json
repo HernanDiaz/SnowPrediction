@@ -1,0 +1,16 @@
+{
+  "experiment": "resunetpp_v6_improved_combined",
+  "eval_splits": [
+    "val",
+    "test"
+  ],
+  "n_pixels": 677237,
+  "MAE": 0.4831,
+  "RMSE": 0.6481,
+  "R2": 0.2565,
+  "NSE": 0.2565,
+  "Bias": -0.3643,
+  "SPAEF": 0.106,
+  "SPAEF_std": 0.9089,
+  "SPAEF_n_tiles": 15
+}

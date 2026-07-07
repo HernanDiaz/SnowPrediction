@@ -1,0 +1,65 @@
+{
+  "experiment": "b1_dem_regression",
+  "dataset": "dataset_v4_ms_sx200 (1m, 22ch)",
+  "description": "Linear regression DEM -> snow depth (physical baseline)",
+  "test_metrics": {
+    "R2": -0.137,
+    "RMSE": 0.7764,
+    "MAE": 0.5934,
+    "Bias": -0.3261,
+    "SPAEF": -0.6947,
+    "SPAEF_std": 0.1473,
+    "SPAEF_n_tiles": 220,
+    "MSPAEF": -0.6077,
+    "MSPAEF_std": 4.3614,
+    "MSPAEF_n_tiles": 220
+  },
+  "all_variants": [
+    {
+      "variant": "DEM only",
+      "channels": [
+        "DEM"
+      ],
+      "coefficients": {
+        "DEM": 0.761834,
+        "intercept": 0.865714
+      },
+      "test_metrics": {
+        "R2": -0.137,
+        "RMSE": 0.7764,
+        "MAE": 0.5934,
+        "Bias": -0.3261,
+        "SPAEF": -0.6947,
+        "SPAEF_std": 0.1473,
+        "SPAEF_n_tiles": 220,
+        "MSPAEF": -0.6077,
+        "MSPAEF_std": 4.3614,
+        "MSPAEF_n_tiles": 220
+      }
+    },
+    {
+      "variant": "DEM + Slope",
+      "channels": [
+        "DEM",
+        "Slope"
+      ],
+      "coefficients": {
+        "DEM": 0.850202,
+        "Slope": -0.477997,
+        "intercept": 0.977301
+      },
+      "test_metrics": {
+        "R2": -0.1277,
+        "RMSE": 0.7732,
+        "MAE": 0.5884,
+        "Bias": -0.326,
+        "SPAEF": -0.5432,
+        "SPAEF_std": 0.1388,
+        "SPAEF_n_tiles": 220,
+        "MSPAEF": -0.5794,
+        "MSPAEF_std": 4.5818,
+        "MSPAEF_n_tiles": 220
+      }
+    }
+  ]
+}

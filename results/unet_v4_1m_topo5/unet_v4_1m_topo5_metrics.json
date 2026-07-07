@@ -1,11 +1,14 @@
 {
   "experiment": "unet_v4_1m_topo5",
-  "timestamp": "2026-04-28 06:48:27",
-  "n_pixels": 131481352,
+  "timestamp": "2026-05-06 11:20:15",
+  "n_pixels": 46947202,
   "tta": false,
-  "MAE": 0.545,
-  "RMSE": 0.7137,
-  "R2": 0.0811,
-  "NSE": 0.0811,
-  "Bias": -0.2642
+  "MAE": 0.6286,
+  "RMSE": 0.7959,
+  "R2": -0.2071,
+  "NSE": -0.2071,
+  "Bias": -0.4391,
+  "SPAEF": 0.059,
+  "SPAEF_std": 0.3587,
+  "SPAEF_n_tiles": 850
 }

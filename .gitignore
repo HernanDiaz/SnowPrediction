@@ -19,7 +19,8 @@ Articulo 1/
 results/**/*.png
 results/**/*.db
 results/**/*.joblib
-results/**/run_log.txt
+results/**/*_log.txt
+results/*_log.txt
 
 # Los metrics.json SI se incluyen (son ligeros y documentan resultados)
 # results/**/*.json  <-- NO ignorar

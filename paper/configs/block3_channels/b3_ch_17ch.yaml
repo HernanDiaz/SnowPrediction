@@ -1,0 +1,58 @@
+experiment:
+  name: b3_ch_17ch
+
+# PAPER - Block 3: Channel ablation — 17 channels (topo + SCE + Sx_200m + persistence).
+# No multi-scale (5m context) features. Uses channels 0-16 of dataset_v4_ms_sx200,
+# so Sx channels are Sx_200m (same radius as the full 22ch model).
+# Isolates the contribution of multi-scale context (channels 17-21).
+#
+# Channels [0..16]:
+#   0-4  : DEM, Slope, Northness, Eastness, TPI (1m topo)
+#   5    : SCE binary
+#   6-13 : Sx_200m x8 directions
+#   14-16: Persistence 15d, 30d, 60d
+#
+# Dataset : dataset_v4_ms_sx200 (22ch) — only channels [0..16] loaded
+# Split   : train=2021-2023, val=2024, test=2025
+# Seed    : 42
+
+data:
+  root: "dataset_v4_ms_sx200"
+  csv_file: "dataset_v4_ms_sx200.csv"
+  images_dir: "images"
+  masks_dir: "masks"
+  source: "lidar"
+  split_type: "temporal"
+  use_sce: false
+  augmentation: true
+  augmentation_mode: "h"
+  channel_indices: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+
+model:
+  architecture: "resunetpp"
+  in_channels: 17
+  out_channels: 1
+  features: [48, 96, 192, 384]
+  dropout_p: 0.1
+  num_groups: 8
+
+training:
+  seed: 42
+  batch_size: 8
+  learning_rate: 0.00039
+  epochs: 300
+  loss: "mse"
+  weight_decay: 1.6e-05
+  optimizer: "adam"
+  grad_clip: 0.0
+  scheduler: "cosine"
+  lr_min: 1.0e-6
+  early_stopping: true
+  es_patience: 20
+  num_workers: 0
+  device: "auto"
+
+output:
+  models_dir: "Articulo 1/Models"
+  results_dir: "paper/results/block3_channels/b3_ch_17ch"
+  model_name: "b3_ch_17ch"

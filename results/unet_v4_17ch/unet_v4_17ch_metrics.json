@@ -1,0 +1,14 @@
+{
+  "experiment": "unet_v4_17ch",
+  "timestamp": "2026-04-28 23:03:30",
+  "n_pixels": 11933976,
+  "tta": false,
+  "MAE": 0.6423,
+  "RMSE": 0.8177,
+  "R2": -0.2613,
+  "NSE": -0.2613,
+  "Bias": -0.5292,
+  "SPAEF": 0.1101,
+  "SPAEF_std": 0.3935,
+  "SPAEF_n_tiles": 220
+}

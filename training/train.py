@@ -260,11 +260,7 @@ def train_model(model:        nn.Module,
 
         early_stopping = cfg_tr.get('early_stopping', True)
         saved = ""
-        if not early_stopping:
-            # Sin early stopping: siempre guardar el ultimo checkpoint
-            torch.save(model.state_dict(), model_path)
-            saved = "  [guardado]"
-        elif val_loss < best_val_loss:
+        if val_loss < best_val_loss:
             best_val_loss = val_loss
             torch.save(model.state_dict(), model_path)
             saved = "  [GUARDADO]"
@@ -295,8 +291,12 @@ def train_model(model:        nn.Module,
         torch.save(swa_model.module.state_dict(), model_path)
         print(f"Modelo principal reemplazado con SWA: {model_path}")
 
+    # Guardar checkpoint de la ultima epoca
+    last_model_path = model_path.replace('.pth', '_last.pth')
+    torch.save(model.state_dict(), last_model_path)
     print(f"\nMejor val loss : {best_val_loss:.4f}")
-    print(f"Modelo guardado: {model_path}")
+    print(f"Modelo (best)  : {model_path}")
+    print(f"Modelo (last)  : {last_model_path}")
 
     plot_training_curves(history, save_path=curve_path,
                          title=f"Curva de Aprendizaje - {exp}")

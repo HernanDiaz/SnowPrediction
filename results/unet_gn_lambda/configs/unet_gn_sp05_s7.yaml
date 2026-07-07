@@ -1,0 +1,39 @@
+experiment:
+  name: unet_gn_sp05_s7
+data:
+  root: dataset_v4_ms_sx200
+  csv_file: dataset_v4_ms_sx200.csv
+  images_dir: images
+  masks_dir: masks
+  source: lidar
+  split_type: temporal
+  use_sce: false
+  augmentation: false
+model:
+  architecture: unet_gn
+  in_channels: 22
+  out_channels: 1
+  features:
+  - 48
+  - 96
+  - 192
+  - 384
+  dropout_p: 0.0012
+  num_groups: 8
+training:
+  seed: 7
+  batch_size: 16
+  learning_rate: 3.064e-05
+  epochs: 50
+  loss: spatial_mse
+  lambda_pearson: 0.5
+  weight_decay: 2.149e-05
+  optimizer: adam
+  grad_clip: 1.0
+  early_stopping: false
+  num_workers: 0
+  device: auto
+output:
+  models_dir: results/unet_gn_lambda/weights
+  results_dir: results/unet_gn_lambda/sp05_s7
+  model_name: unet_gn_sp05_s7

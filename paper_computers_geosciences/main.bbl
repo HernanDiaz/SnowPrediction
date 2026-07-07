@@ -1,0 +1,123 @@
+\begin{thebibliography}{10}
+\expandafter\ifx\csname url\endcsname\relax
+  \def\url#1{\texttt{#1}}\fi
+\expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
+\expandafter\ifx\csname href\endcsname\relax
+  \def\href#1#2{#2} \def\path#1{#1}\fi
+
+\bibitem{lopezmoreno2013}
+J.~I. L{\'o}pez-Moreno, J.~Revuelto, S.~R. Fassnacht, C.~Azorin-Molina, S.~M.
+  Vicente-Serrano, E.~Mor{\'a}n-Tejeda, G.~A. Sexstone, Snowpack variability
+  across various spatio-temporal resolutions, Hydrological Processes 29~(6)
+  (2015) 1213--1224.
+
+\bibitem{fayad2017}
+A.~Fayad, S.~Gascoin, G.~Faour, J.~I. L{\'o}pez-Moreno, L.~Drapeau, M.~Le~Page,
+  R.~Escadafal, Snow hydrology in {Mediterranean} mountain regions: A review,
+  Journal of Hydrology 551 (2017) 374--396.
+
+\bibitem{mott2018}
+R.~Mott, V.~Vionnet, T.~Gr{\"u}newald, The seasonal snow cover dynamics: review
+  on wind-driven coupling processes, Frontiers in Earth Science 6 (2018) 197.
+
+\bibitem{revuelto2014}
+J.~Revuelto, J.~I. L{\'o}pez-Moreno, C.~Azorin-Molina, S.~M. Vicente-Serrano,
+  Topographic control of snowpack distribution in a small catchment in the
+  central {Spanish} {Pyrenees}, The Cryosphere 8~(5) (2014) 1989--2006.
+
+\bibitem{deems2013}
+J.~S. Deems, T.~H. Painter, D.~C. Finnegan, Lidar measurement of snow depth: a
+  review, Journal of Glaciology 59~(215) (2013) 467--479.
+
+\bibitem{painter2016}
+T.~H. Painter, D.~F. Berisford, J.~W. Boardman, et~al., The {Airborne} {Snow}
+  {Observatory}: Fusion of scanning lidar, imaging spectrometer, and
+  physically-based modeling for mapping snow water equivalent and snow albedo,
+  Remote Sensing of Environment 184 (2016) 139--152.
+
+\bibitem{broxton2019}
+P.~D. Broxton, W.~J.~D. van Leeuwen, J.~A. Biederman, Improving snow water
+  equivalent maps with machine learning of snow survey and lidar measurements,
+  Water Resources Research 55~(5) (2019) 3739--3757.
+
+\bibitem{daudt2018}
+R.~C. Daudt, B.~Le~Saux, A.~Boulch, Fully convolutional {Siamese} networks for
+  change detection, in: IEEE International Conference on Image Processing
+  (ICIP), 2018, pp. 4063--4067.
+
+\bibitem{king2020}
+F.~King, A.~R. Erler, S.~K. Frey, C.~G. Fletcher, Application of machine
+  learning techniques for regional bias correction of snow water equivalent
+  estimates in {Ontario}, {Canada}, Hydrology and Earth System Sciences 24~(10)
+  (2020) 4887--4902.
+
+\bibitem{elder1991}
+K.~Elder, J.~Dozier, J.~Michaelsen, Snow accumulation and distribution in an
+  alpine watershed, Water Resources Research 27~(7) (1991) 1541--1552.
+
+\bibitem{molotch2005}
+N.~P. Molotch, M.~T. Colee, R.~C. Bales, J.~Dozier, Estimating the spatial
+  distribution of snow water equivalent in an alpine basin using binary
+  regression tree models, Hydrological Processes 19~(7) (2005) 1459--1479.
+
+\bibitem{winstral2002}
+A.~Winstral, K.~Elder, R.~E. Davis, Spatial snow modeling of wind-redistributed
+  snow using terrain-based parameters, Journal of Hydrometeorology 3~(5) (2002)
+  524--538.
+
+\bibitem{winstral2013}
+A.~Winstral, D.~Marks, R.~Gurney, Simulating wind-affected snow accumulations
+  at catchment to basin scales, Advances in Water Resources 55 (2013) 64--79.
+
+\bibitem{breiman2001}
+L.~Breiman, Random forests, Machine Learning 45~(1) (2001) 5--32.
+
+\bibitem{ntokas2021}
+K.~F.~F. Ntokas, J.~Odry, M.-A. Boucher, C.~Garnaud, Investigating {ANN}
+  architectures and training to estimate snow water equivalent from snow depth,
+  Hydrology and Earth System Sciences 25~(6) (2021) 3017--3040.
+
+\bibitem{ronneberger2015}
+O.~Ronneberger, P.~Fischer, T.~Brox, {U-Net}: Convolutional networks for
+  biomedical image segmentation, in: Medical Image Computing and
+  Computer-Assisted Intervention (MICCAI), 2015, pp. 234--241.
+
+\bibitem{zhang2018}
+Z.~Zhang, Q.~Liu, Y.~Wang, Road extraction by deep residual {U-Net}, IEEE
+  Geoscience and Remote Sensing Letters 15~(5) (2018) 749--753.
+
+\bibitem{jha2019}
+D.~Jha, P.~H. Smedsrud, M.~A. Riegler, D.~Johansen, T.~de~Lange, P.~Halvorsen,
+  H.~D. Johansen, {ResUNet++}: An advanced architecture for medical image
+  segmentation, in: IEEE International Symposium on Multimedia (ISM), 2019, pp.
+  225--2255.
+
+\bibitem{mital2022}
+U.~Mital, D.~Dwivedi, J.~B. Brown, C.~I. Steefel, Downscaling and
+  spatiotemporal gap-filling of soil moisture and snow water equivalent using
+  machine learning, Frontiers in Water 4 (2022) 908949.
+
+\bibitem{koch2018}
+J.~Koch, M.~C. Demirel, S.~Stisen, The {SPAtial} {EFficiency} metric ({SPAEF}):
+  multiple-component evaluation of spatial patterns for optimization of
+  hydrological models, Geoscientific Model Development 11~(5) (2018)
+  1873--1886.
+
+\bibitem{demirel2018}
+M.~C. Demirel, J.~Mai, G.~Mendiguren, J.~Koch, L.~Samaniego, S.~Stisen,
+  Combining satellite data and appropriate objective functions for improved
+  spatial pattern performance of a distributed hydrologic model, Hydrology and
+  Earth System Sciences 22~(2) (2018) 1299--1315.
+
+\bibitem{zhao2017}
+H.~Zhao, O.~Gallo, I.~Frosio, J.~Kautz, Loss functions for image restoration
+  with neural networks, IEEE Transactions on Computational Imaging 3~(1) (2017)
+  47--57.
+
+\bibitem{akiba2019}
+T.~Akiba, S.~Sano, T.~Yanase, T.~Ohta, M.~Koyama, {Optuna}: A next-generation
+  hyperparameter optimization framework, in: Proceedings of the 25th ACM SIGKDD
+  International Conference on Knowledge Discovery \& Data Mining, 2019, pp.
+  2623--2631.
+
+\end{thebibliography}

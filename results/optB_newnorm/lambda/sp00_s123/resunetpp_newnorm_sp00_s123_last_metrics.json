@@ -1,0 +1,17 @@
+{
+  "experiment": "resunetpp_newnorm_sp00_s123_last",
+  "timestamp": "2026-06-21 18:18:46",
+  "n_pixels": 11933976,
+  "tta": false,
+  "MAE": 0.6038,
+  "RMSE": 0.7789,
+  "R2": -0.1444,
+  "NSE": -0.1444,
+  "Bias": -0.4322,
+  "SPAEF": -0.1566,
+  "SPAEF_std": 0.6162,
+  "SPAEF_n_tiles": 220,
+  "MSPAEF": 0.2618,
+  "MSPAEF_std": 0.6812,
+  "MSPAEF_n_tiles": 220
+}

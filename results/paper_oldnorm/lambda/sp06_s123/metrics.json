@@ -1,0 +1,17 @@
+{
+  "experiment": "resunetpp_hpo_sp06_s123",
+  "timestamp": "2026-05-26 14:39:44",
+  "n_pixels": 11933976,
+  "tta": false,
+  "MAE": 0.4802,
+  "RMSE": 0.655,
+  "R2": 0.1909,
+  "NSE": 0.1909,
+  "Bias": -0.3166,
+  "SPAEF": 0.2689,
+  "SPAEF_std": 0.3212,
+  "SPAEF_n_tiles": 220,
+  "MSPAEF": 0.5237,
+  "MSPAEF_std": 0.4403,
+  "MSPAEF_n_tiles": 220
+}

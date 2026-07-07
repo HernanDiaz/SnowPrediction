@@ -14,7 +14,10 @@
     "RMSE": 0.6349,
     "R2": 0.2555,
     "NSE": 0.2555,
-    "Bias": -0.2522
+    "Bias": -0.2522,
+    "SPAEF": 0.3134,
+    "SPAEF_std": 0.232,
+    "SPAEF_n_tiles": 44
   },
   "feature_importance": {
     "DEM": 0.2878,

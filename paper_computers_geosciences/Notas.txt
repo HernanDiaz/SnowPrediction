@@ -1,0 +1,7 @@
+En las aportaciones 
+
+Hay que detallar bien las fuentes de datos: lidar (me parece que no era lidar, hay que ser precisos en el instrumento que se utiliza, nombre, precision, etc)
+Lo mismo para cada fuente de datos, decir cual es el origen, sensores, etc.
+
+
+Calle santa rosalia 13 4 I: 

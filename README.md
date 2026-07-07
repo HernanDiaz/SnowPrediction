@@ -2,6 +2,14 @@
 
 Deep learning and Random Forest models for snow depth prediction in the Izas experimental catchment (Spanish Pyrenees), using LiDAR and Pleiades imagery at multiple resolutions.
 
+> **Reproducing the paper** (*Spatially-aware deep learning for high-resolution
+> snow depth mapping*, Computers & Geosciences): see
+> [`paper_computers_geosciences/REPRODUCIBILITY.md`](paper_computers_geosciences/REPRODUCIBILITY.md).
+> The current paper uses the **22-channel, 1 m** `dataset_v4_ms_sx200` and a
+> ResUNet++ with a spatial loss. The "Results summary" table further down in this
+> README refers to **earlier 5 m / 17-channel experiments** and is kept only for
+> historical reference.
+
 ## Repository structure
 
 ```

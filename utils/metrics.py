@@ -65,6 +65,68 @@ def compute_spaef(obs: np.ndarray, sim: np.ndarray, n_bins: int = 100) -> float:
     return float(1.0 - np.sqrt((rho - 1.0)**2 + (alpha - 1.0)**2 + (beta - 1.0)**2))
 
 
+def compute_mspaef(obs: np.ndarray, sim: np.ndarray) -> float:
+    """
+    MSPAEF - Modified Spatial Pattern Efficiency
+    (Karpasitis, Hadjinicolaou & Zittis, GMD 19, 345-367, 2026).
+    https://doi.org/10.5194/gmd-19-345-2026
+
+    MSPAEF = 1 - (1/4) * [(alpha-1)^2 + beta^2 + gamma^2 + delta^2]
+
+    Componentes:
+        alpha = correlacion de Pearson (patron espacial)
+        beta  = NRMSE = RMSE / IQR(obs)          (error cuadratico normalizado)
+        gamma = |mean(sim) - mean(obs)| / IQR(obs) (sesgo medio normalizado)
+        delta = (sigma-1)/2 + |sigma-1|/(sigma+2)
+                donde sigma = std(sim) / std(obs)   (ratio de desviaciones)
+
+    Ventajas sobre SPAEF:
+        - Sin bins de histograma (no requiere parametros de usuario)
+        - Scale-independent (normaliza por IQR)
+        - Sensible al bias absoluto (a diferencia de SPAEF clasico)
+
+    Rango: (-inf, 1].  MSPAEF=1: acuerdo perfecto.
+
+    Args:
+        obs: Valores observados  (1D, pixeles validos de un tile/cuenca)
+        sim: Valores simulados   (1D, mismos pixeles)
+
+    Returns:
+        Valor MSPAEF (float), nan si datos insuficientes o IQR=0.
+    """
+    obs = np.asarray(obs, dtype=np.float64)
+    sim = np.asarray(sim, dtype=np.float64)
+    sim = np.maximum(sim, 0.0)
+
+    if len(obs) < 10:
+        return float('nan')
+
+    iqr_obs = float(np.percentile(obs, 75) - np.percentile(obs, 25))
+    if iqr_obs == 0.0:
+        return float('nan')
+
+    # alpha: correlacion de Pearson
+    alpha = float(np.corrcoef(obs, sim)[0, 1])
+    if np.isnan(alpha):
+        return float('nan')
+
+    # beta: NRMSE normalizado por IQR
+    rmse = float(np.sqrt(np.mean((sim - obs) ** 2)))
+    beta = rmse / iqr_obs
+
+    # gamma: sesgo medio normalizado por IQR
+    gamma = abs(float(np.mean(sim)) - float(np.mean(obs))) / iqr_obs
+
+    # delta: componente de ratio de desviaciones tipicas
+    std_obs = float(np.std(obs))
+    if std_obs == 0.0:
+        return float('nan')
+    sigma = float(np.std(sim)) / std_obs
+    delta = (sigma - 1.0) / 2.0 + abs(sigma - 1.0) / (sigma + 2.0)
+
+    return float(1.0 - 0.25 * ((alpha - 1.0)**2 + beta**2 + gamma**2 + delta**2))
+
+
 def compute_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
     """
     Calcula el conjunto completo de metricas para prediccion de nieve.
@@ -124,14 +186,18 @@ def print_metrics(metrics: dict, title: str = "Resultados"):
     print(f"  {title}")
     print(line)
     unit_fields  = {'MAE', 'RMSE', 'Bias', 'mean_train'}
-    skip_fields  = {'SPAEF_std', 'SPAEF_n_tiles'}   # se muestran junto a SPAEF
+    skip_fields  = {'SPAEF_std', 'SPAEF_n_tiles', 'MSPAEF_std', 'MSPAEF_n_tiles'}
     for k, v in metrics.items():
         if k in skip_fields:
             continue
         unit = " m" if k in unit_fields else ""
         if k == 'SPAEF':
-            n    = metrics.get('SPAEF_n_tiles', '?')
-            std  = metrics.get('SPAEF_std', float('nan'))
+            n   = metrics.get('SPAEF_n_tiles', '?')
+            std = metrics.get('SPAEF_std', float('nan'))
+            print(f"  {k:<12}: {v}  (std={std}, n={n} tiles)")
+        elif k == 'MSPAEF':
+            n   = metrics.get('MSPAEF_n_tiles', '?')
+            std = metrics.get('MSPAEF_std', float('nan'))
             print(f"  {k:<12}: {v}  (std={std}, n={n} tiles)")
         else:
             print(f"  {k:<12}: {v}{unit}")

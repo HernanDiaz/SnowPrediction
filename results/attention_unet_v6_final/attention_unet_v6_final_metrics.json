@@ -1,11 +1,14 @@
 {
   "experiment": "attention_unet_v6_final",
-  "timestamp": "2026-04-28 05:30:20",
+  "timestamp": "2026-05-06 11:17:47",
   "n_pixels": 2054019,
   "tta": false,
   "MAE": 0.5374,
   "RMSE": 0.7115,
   "R2": 0.0651,
   "NSE": 0.0651,
-  "Bias": -0.3937
+  "Bias": -0.3937,
+  "SPAEF": -0.0324,
+  "SPAEF_std": 0.9126,
+  "SPAEF_n_tiles": 44
 }

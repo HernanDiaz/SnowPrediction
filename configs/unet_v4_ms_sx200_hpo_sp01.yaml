@@ -1,0 +1,43 @@
+experiment:
+  name: unet_v4_ms_sx200_hpo_sp01
+
+# UNet HPO con loss espacial MSE + 0.1*(1-Pearson).
+# Hiperparametros optimos del Optuna trial #11.
+# Dataset : dataset_v4_ms_sx200 (1m, 22ch, Sx_200m)
+# Split   : train=2021-2023, val=2024, test=2025
+
+data:
+  root: "dataset_v4_ms_sx200"
+  csv_file: "dataset_v4_ms_sx200.csv"
+  images_dir: "images"
+  masks_dir: "masks"
+  source: "lidar"
+  split_type: "temporal"
+  use_sce: false
+  augmentation: false
+
+model:
+  architecture: "unet"
+  in_channels: 22
+  out_channels: 1
+  features: [48, 96, 192, 384]
+  dropout_p: 0.0012
+
+training:
+  seed: 42
+  batch_size: 16
+  learning_rate: 3.064e-05
+  epochs: 50
+  loss: "spatial_mse"
+  lambda_pearson: 0.1
+  weight_decay: 2.149e-05
+  optimizer: "adam"
+  grad_clip: 1.0
+  early_stopping: false
+  num_workers: 0
+  device: "auto"
+
+output:
+  models_dir: "Articulo 1/Models"
+  results_dir: "results/unet_v4_ms_sx200_hpo_sp01"
+  model_name: "unet_v4_ms_sx200_hpo_sp01"

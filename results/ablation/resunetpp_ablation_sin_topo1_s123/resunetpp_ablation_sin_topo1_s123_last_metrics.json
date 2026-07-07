@@ -1,0 +1,17 @@
+{
+  "experiment": "resunetpp_ablation_sin_topo1_s123_last",
+  "timestamp": "2026-05-24 20:18:00",
+  "n_pixels": 11933976,
+  "tta": false,
+  "MAE": 0.4743,
+  "RMSE": 0.6475,
+  "R2": 0.2093,
+  "NSE": 0.2093,
+  "Bias": -0.2985,
+  "SPAEF": 0.2869,
+  "SPAEF_std": 0.3175,
+  "SPAEF_n_tiles": 220,
+  "MSPAEF": 0.5172,
+  "MSPAEF_std": 0.4579,
+  "MSPAEF_n_tiles": 220
+}

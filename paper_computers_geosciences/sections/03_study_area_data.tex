@@ -1,0 +1,181 @@
+\section{Study area and data}
+\label{sec:data}
+
+\subsection{Study area}
+\label{subsec:area}
+
+The study is carried out in the Izas experimental catchment, a small
+(${\sim}0.55$\,km$^2$) alpine headwater basin located in the Central Spanish
+Pyrenees (province of Huesca), at elevations of approximately
+2000--2300\,m\,a.s.l. The catchment has been monitored for decades by the
+Pyrenean Institute of Ecology (IPE--CSIC) and is characterised by a
+strongly wind-influenced snowpack: persistent north-westerly winds generate
+pronounced snow redistribution, with deep drifts on lee slopes and scoured
+wind-exposed ridges. This produces the sharp, repeatable spatial patterns of
+accumulation that make Izas an ideal testbed for high-resolution HS
+prediction (Fig.~\ref{fig:study_area}). The LiDAR and meteorological data used
+in this study were provided through a collaboration with IPE--CSIC.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{fig01_study_area.pdf}
+  \caption{Location and physiography of the Izas experimental catchment
+  (Central Spanish Pyrenees). (a) Regional setting within the Iberian
+  Peninsula and the Pyrenees; (b) outline of the LiDAR-surveyed footprint
+  (union of all acquisition dates) over a hillshade of the 1\,m DEM
+  (EPSG:25830, UTM zone 30N); (c) example LiDAR-derived snow-depth map
+  (1\,April 2025) illustrating the wind-driven accumulation patterns the
+  models must reproduce.}
+  \label{fig:study_area}
+\end{figure}
+
+\subsection{LiDAR snow-depth surveys}
+\label{subsec:lidar}
+
+Snow depth was derived from airborne LiDAR surveys by differencing snow-on
+digital surface models against a snow-off reference, yielding HS maps at 1\,m
+spatial resolution. A total of 27 acquisition dates spanning four hydrological
+years (2021--2025) are available. The resulting HS rasters constitute the
+prediction target (ground truth) of all models. To enable convolutional
+processing, each dated HS map and its co-registered predictor stack are tiled
+into fixed-size patches; pixels outside the catchment mask or without valid HS
+are excluded from both training and evaluation.
+
+\subsection{Predictor channels}
+\label{subsec:channels}
+
+Each training sample is a multi-channel image in which the predictors are
+spatially co-registered with the target HS map at 1\,m resolution. The base
+configuration comprises \textbf{22 channels}, which we group into four
+families (Table~\ref{tab:channels}); Fig.~\ref{fig:channels} shows an example
+predictor stack for one tile:
+
+\begin{itemize}
+  \item \textbf{Fine-scale topography (1\,m).} Elevation (DEM), slope,
+  northness ($\cos$ of aspect) and eastness ($\sin$ of aspect), and the
+  Topographic Position Index (TPI). These describe the local terrain that
+  controls radiation, gravitational transport and small-scale deposition.
+
+  \item \textbf{Coarse-scale topography (5\,m).} The same five terrain
+  derivatives computed from a 5\,m DEM. The coarser scale captures the
+  meso-topographic context (ridges, gullies, broad lee slopes) that governs
+  wind redistribution over longer fetch distances.
+
+  \item \textbf{Wind sheltering.} The maximum upwind slope index $S_x$
+  \citep{winstral2002} computed over a 200\,m search distance for eight
+  azimuths ($0^\circ$, $45^\circ$, \ldots, $315^\circ$). These eight channels
+  encode directional exposure/sheltering and are the primary terrain-based
+  proxy for wind-driven accumulation and scour.
+
+  \item \textbf{Snow-cover history.} The fractional snow-cover persistence over
+  the 15, 30 and 60 days preceding each acquisition, derived from a binary
+  satellite snow-cover product (snow vs.\ no-snow) reprojected to 1\,m and
+  temporally averaged; plus the instantaneous satellite snow-cover extent
+  (SCE) of the acquisition date.
+\end{itemize}
+
+\begin{table}[t]
+  \centering
+  \caption{The 22 base predictor channels and the four additional
+  meteorological channels (26-channel configuration). ``Static'' channels are
+  constant in time; ``dynamic'' channels vary between acquisition dates.}
+  \label{tab:channels}
+  \small
+  \begin{tabular}{clcc}
+    \toprule
+    Idx & Channel & Family & Type \\
+    \midrule
+    0  & DEM (1\,m)              & Topo 1\,m   & static  \\
+    1  & Slope (1\,m)            & Topo 1\,m   & static  \\
+    2  & Northness (1\,m)        & Topo 1\,m   & static  \\
+    3  & Eastness (1\,m)         & Topo 1\,m   & static  \\
+    4  & TPI (1\,m)              & Topo 1\,m   & static  \\
+    5  & SCE (snow-cover extent) & Snow        & dynamic \\
+    6--13 & $S_x$ 200\,m (8 azimuths) & Wind   & static  \\
+    14 & Persistence 15\,d       & Snow        & dynamic \\
+    15 & Persistence 30\,d       & Snow        & dynamic \\
+    16 & Persistence 60\,d       & Snow        & dynamic \\
+    17 & DEM (5\,m)              & Topo 5\,m   & static  \\
+    18 & Slope (5\,m)            & Topo 5\,m   & static  \\
+    19 & Northness (5\,m)        & Topo 5\,m   & static  \\
+    20 & Eastness (5\,m)         & Topo 5\,m   & static  \\
+    21 & TPI (5\,m)              & Topo 5\,m   & static  \\
+    \midrule
+    \multicolumn{4}{l}{\textit{Additional meteorological channels (26-ch
+    configuration)}}\\
+    22 & Mean air temp.\ 7\,d    & Meteo       & dynamic (scalar) \\
+    23 & Mean air temp.\ 15\,d   & Meteo       & dynamic (scalar) \\
+    24 & Mean air temp.\ 30\,d   & Meteo       & dynamic (scalar) \\
+    25 & Accum.\ precip.\ from Oct & Meteo     & dynamic (scalar) \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Snow persistence.}
+The persistence channels summarise the recent snow history of each pixel. For
+a given acquisition date and temporal window $W\in\{15,30,60\}$ days, the
+binary snow-cover product (snow $=1$, no-snow/cloud $=0$) is reprojected from
+its native 10\,m resolution to 1\,m by bilinear resampling and averaged over
+all available observations within the window, yielding a value in $[0,1]$ that
+represents the fraction of recent days on which the pixel was snow-covered.
+The ablation study (Section~\ref{subsec:res_ablation}) shows that these
+channels are among the most informative predictors.
+
+\paragraph{Meteorological channels (extended configuration).}
+To test whether explicit meteorological forcing improves prediction, we build
+an extended 26-channel configuration that adds four scalar channels derived
+from the catchment automatic weather station (provided by IPE--CSIC): the mean
+air temperature over the 7, 15 and 30 days preceding the acquisition, and the
+precipitation accumulated since the 1st of October of the corresponding
+hydrological year. These are scalar (spatially uniform) per date: every pixel
+of a given acquisition shares the same value, so the channels encode the
+temporal meteorological context rather than spatial structure.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{fig02_channels.pdf}
+  \caption{Example predictor stack for a single $256\times256$\,m tile
+  (2\,February 2021). Rows, top to bottom: fine 1\,m topographic derivatives
+  (DEM, slope, northness, eastness, TPI); the corresponding coarse 5\,m
+  derivatives; the eight $S_x$ wind-sheltering indices (0--315\textdegree);
+  and the satellite snow-cover extent (SCE), the 15/30/60-day snow-persistence
+  channels and the target LiDAR snow-depth map. Each panel is independently
+  scaled; diverging fields are centred at zero.}
+  \label{fig:channels}
+\end{figure}
+
+\subsection{Temporal split}
+\label{subsec:split}
+
+To obtain an honest estimate of predictive skill on \emph{unseen conditions},
+we use a strictly temporal train/validation/test split rather than a random
+pixel or tile split, which would leak spatial information between sets
+(Fig.~\ref{fig:split}):
+
+\begin{itemize}
+  \item \textbf{Training:} hydrological years 2021--2023 (15 dates,
+  4241 tiles).
+  \item \textbf{Validation:} 2024 (7 dates, 431 tiles).
+  \item \textbf{Test:} 2025 (5 dates, 220 tiles).
+\end{itemize}
+
+The test year 2025 was an exceptionally snowy season: the mean test HS
+(1.09\,m) is $51\%$ higher than the mean training HS (0.72\,m). This
+distribution shift is deliberate -- it stresses the extrapolation ability of
+the models and explains the moderate absolute \Rsq{} values and the
+non-negligible seed-to-seed variance observed in
+Section~\ref{sec:results}. We regard robustness under this shift as a key,
+realistic requirement for operational snow mapping.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{fig03_split_distribution.pdf}
+  \caption{Temporal train/validation/test split and the corresponding
+  distributions of LiDAR snow depth. (a) Per-date median snow depth
+  ($\pm$ interquartile range) along the acquisition timeline, coloured by
+  split. (b) Per-year snow-depth distributions (violins); black dots mark the
+  annual means and the dashed line the training mean. The 2025 test year is
+  markedly snowier than the 2021--2023 training years, illustrating the
+  distribution shift that the models must extrapolate to.}
+  \label{fig:split}
+\end{figure}

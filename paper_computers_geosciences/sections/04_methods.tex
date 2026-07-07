@@ -1,0 +1,270 @@
+\section{Methods}
+\label{sec:methods}
+
+\subsection{Overview and preprocessing}
+\label{subsec:preproc}
+
+All models predict HS at 1\,m resolution from the predictor stack described in
+Section~\ref{subsec:channels}. Each channel is normalised to a comparable
+range using fixed, physically motivated scalings (e.g.\ elevation is
+standardised with a reference mean and standard deviation, slopes are divided
+by $90^\circ$, the TPI is clipped to $[-1,1]$, the $S_x$ indices are divided by
+$90^\circ$, persistence channels are already in $[0,1]$, and SCE is binarised).
+Invalid sentinel values ($-9999$) and NaNs are replaced by zero after
+normalisation. Pixels without valid HS are masked out of the loss and of every
+metric. Crucially, normalisation is applied to the full 22-channel stack
+\emph{before} any channel subset is selected, so that the ablation experiments
+(Section~\ref{subsec:res_ablation}) do not alter the normalisation statistics
+of the remaining channels.
+
+\subsection{Models}
+\label{subsec:models}
+
+\paragraph{Random Forest (baseline).}
+As a strong non-spatial baseline we train a Random Forest regressor
+\citep{breiman2001} on the per-pixel feature vectors. Hyperparameters were
+optimised with Optuna \citep{akiba2019} and the final configuration uses
+300 trees, a maximum depth of 15, a minimum of one sample per leaf,
+\texttt{log2} feature subsampling and a minimum of two samples to split. The
+RF is trained on the union of the training and validation pixels (standard
+refit after hyperparameter optimisation) and predicts each pixel
+independently; spatial metrics are computed by reassembling the per-pixel
+predictions into their original tiles.
+
+\paragraph{U-Net.}
+The U-Net \citep{ronneberger2015} is a symmetric encoder--decoder with skip
+connections. Our implementation uses a base width of 48 feature maps and the
+standard four-level contracting/expanding path, and is trained end-to-end as a
+pixel-wise regressor. We use Group Normalisation in the U-Net as well, since
+Batch Normalisation proved unreliable under our small batch sizes -- its running
+statistics collapsed at evaluation time -- and using the same normalisation in
+both networks ensures that the U-Net/ResUNet++ comparison isolates the effect of
+the architecture rather than of the normalisation layer.
+
+\paragraph{ResUNet++.}
+ResUNet++ \citep{jha2019} augments the residual U-Net
+\citep{zhang2018} with squeeze-and-excitation blocks in the encoder, an atrous
+spatial pyramid pooling (ASPP) bridge, and attention gates in the decoder.
+These components improve gradient flow and multi-scale context aggregation. We
+use a base width of 64 and Group Normalisation (8 groups) instead of Batch
+Normalisation, which we found essential for stable training under the small
+batch sizes imposed by high-resolution tiles and the heterogeneous,
+date-dependent statistics of the snowpack.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{fig_architecture.pdf}
+  \caption{ResUNet++ adapted for pixel-wise snow-depth regression. A three-level
+  residual encoder with squeeze-and-excitation (SE) blocks and Group
+  Normalisation encodes the $N$-channel input; an atrous spatial pyramid pooling
+  (ASPP, dilations $r=1,6,12,18$) bottleneck aggregates multi-scale context; and
+  a decoder with attention-gated skip connections (AG) reconstructs the field.
+  The $1\times1$ output head is linear (no activation), yielding a continuous
+  snow-depth map. Resolutions and channel counts correspond to the
+  base-width-64 configuration on $256\times256$ tiles.}
+  \label{fig:architecture}
+\end{figure}
+
+\subsection{Adapting ResUNet++ for pixel-wise snow-depth regression}
+\label{subsec:adaptation}
+
+ResUNet++ was originally proposed for binary medical image
+\emph{segmentation} \citep{jha2019}; running it as a snow-depth predictor
+required adapting it to the pixel-wise regression framework introduced by
+MAPunet \citep{betato2025mapunet}. Concretely, the model learns a mapping
+$f:\mathbb{R}^{H\times W\times N}\!\rightarrow\!\mathbb{R}_{\ge 0}^{H\times W}$
+that turns an $N$-channel input volume (here $N=22$, or $26$ with the
+meteorological channels) into a single continuous snow-depth field
+(Fig.~\ref{fig:architecture}). We made the following modifications:
+
+\begin{itemize}
+  \item \textbf{Input layer.} The first convolution was widened to accept the
+  $N$ co-registered predictor channels (Table~\ref{tab:channels}) instead of a
+  fixed three-band image, so that arbitrary channel subsets can be fed to the
+  network (used by the ablation in Section~\ref{subsec:res_ablation}).
+
+  \item \textbf{Regression output.} The final $1\times1$ convolution produces a
+  single feature map and, crucially, carries \emph{no} output activation (no
+  sigmoid/softmax), yielding unbounded continuous values; predictions are
+  clipped to non-negative depths only at inference.
+
+  \item \textbf{Masked regression loss.} High-resolution LiDAR maps contain
+  \textit{nodata} pixels (occlusions, gaps, out-of-catchment cells). Following
+  the masked-supervision principle of MAPunet, the loss and all metrics are
+  evaluated only over valid pixels; invalid pixels are excluded from both the
+  pixel-wise MSE and the spatial-correlation term of
+  Eq.~\eqref{eq:loss}.
+
+  \item \textbf{Normalisation for heterogeneous inputs.} Group Normalisation
+  (8 groups) replaces Batch Normalisation to remain stable under the small
+  batches imposed by high-resolution tiles and the strongly date-dependent
+  statistics of the snowpack, and every channel is scaled with fixed physical
+  factors (Section~\ref{subsec:preproc}) before being fed to the network.
+\end{itemize}
+
+\noindent The same adaptations apply to the U-Net baseline, so that the two
+architectures differ only in their internal blocks and are compared on an equal
+footing.
+
+\subsection{Spatial evaluation metrics}
+\label{subsec:metrics}
+
+\paragraph{Pixel-wise metrics.}
+We report the coefficient of determination (\Rsq{}, equivalently the
+Nash--Sutcliffe efficiency), the mean absolute error (MAE), the root mean
+squared error (RMSE) and the bias, all computed over the valid test pixels.
+
+\paragraph{SPAEF.}
+To assess the fidelity of the predicted \emph{spatial pattern} we use the
+Spatial Efficiency metric \citep{koch2018}, defined as
+%
+\begin{equation}
+  \SPAEF = 1 - \sqrt{(\alpha-1)^2 + (\beta-1)^2 + (\gamma-1)^2},
+  \label{eq:spaef}
+\end{equation}
+%
+where the three components measure complementary aspects of pattern agreement:
+%
+\begin{equation}
+  \alpha = \rho(o,s), \qquad
+  \beta  = \frac{\sigma_s/\mu_s}{\sigma_o/\mu_o}, \qquad
+  \gamma = \frac{\sum_{j=1}^{K}\min\!\big(h^{o}_{j}, h^{s}_{j}\big)}
+                {\sum_{j=1}^{K} h^{o}_{j}} .
+  \label{eq:spaef_components}
+\end{equation}
+%
+Here $o$ and $s$ are the observed and simulated fields, $\rho$ is the Pearson
+correlation coefficient ($\alpha$ measures linear co-location of the pattern),
+$\beta$ is the ratio of the coefficients of variation (it penalises
+over-/under-dispersed patterns), and $\gamma$ is the intersection of the
+$K$-bin histograms $h^{o}$ and $h^{s}$ of the two fields (it measures the
+agreement of the value distributions). A perfect match yields
+$\SPAEF=1$; the metric is unbounded below. \SPAEF{} is computed per tile and
+averaged over the test set.
+
+\paragraph{MSPAEF.}
+As a second pattern-oriented metric we use the modified \SPAEF{} (\MSPAEF{}) of
+\citet{karpasitis2026},
+%
+\begin{equation}
+  \MSPAEF = 1 - \tfrac{1}{4}\big[(\alpha-1)^2 + \beta^2 + \gamma^2 + \delta^2\big],
+  \label{eq:mspaef}
+\end{equation}
+%
+where $\alpha=\rho(o,s)$ is again the Pearson correlation, $\beta$ is the RMSE
+normalised by the interquartile range (IQR) of the observations, $\gamma$ is
+the absolute mean bias normalised by the same IQR, and $\delta$ is a
+standard-deviation-ratio term. Compared with the classical \SPAEF{} of
+Eq.~\eqref{eq:spaef}, \MSPAEF{} (i) requires no histogram-bin parameter and
+(ii) is explicitly sensitive to the absolute mean bias, which \SPAEF{} ignores.
+This is particularly relevant here, since all models systematically
+under-predict the anomalously snowy 2025 test year; we therefore report
+\MSPAEF{} as a complementary, bias-aware indicator. Like \SPAEF{}, it is
+computed per tile and averaged over the test set.
+
+\subsection{Hybrid spatial loss}
+\label{subsec:loss}
+
+Training a CNN with a pure pixel-wise MSE encourages regression to the mean and
+tends to produce over-smoothed maps. To explicitly reward spatial pattern
+fidelity, we train the CNNs with a hybrid loss that linearly combines the
+pixel-wise MSE with a spatial Pearson-correlation term:
+%
+\begin{equation}
+  \mathcal{L} = (1-\lpear)\,\underbrace{\mathrm{MSE}(o,s)}_{\text{pixel-wise}}
+  + \lpear\,\underbrace{\big(1-\rho_{\text{spatial}}(o,s)\big)}
+  _{\text{pattern}},
+  \label{eq:loss}
+\end{equation}
+%
+where $\rho_{\text{spatial}}$ is the Pearson correlation between the predicted
+and observed fields computed over the valid pixels of each tile, and
+$\lpear\in[0,1]$ controls the trade-off between absolute accuracy and pattern
+agreement. With $\lpear=0$ the loss reduces to plain MSE; increasing $\lpear$
+progressively prioritises the reproduction of the spatial pattern. The
+correlation term is differentiable and adds negligible computational cost. We
+characterise the effect of $\lpear$ through a full sweep
+(Section~\ref{subsec:res_lambda}).
+
+\subsection{Training and evaluation protocol}
+\label{subsec:protocol}
+
+\paragraph{Implementation and hardware.}
+All models were implemented in PyTorch~2.11 (CUDA~12.8) and trained on a single
+desktop workstation with an NVIDIA GeForce RTX~5060~Ti GPU (16\,GB), an AMD
+Ryzen~5 3400G CPU and 32\,GB of RAM, running Windows~10. The Random Forest used
+scikit-learn~1.8, and all hyperparameter searches used Optuna~4.8
+\citep{akiba2019}.
+
+\paragraph{Hyperparameter optimisation.}
+All model hyperparameters were tuned with Optuna \citep{akiba2019} using a
+Tree-structured Parzen Estimator (TPE) sampler on the train/validation split,
+keeping the 2025 test year strictly untouched during the search. For the CNNs we
+jointly searched the base width, optimiser, learning rate, weight decay,
+dropout, batch size and gradient clipping (Table~\ref{tab:hyperparams}); each
+trial was trained for up to 150 epochs with a median pruner (10 start-up trials,
+20 warm-up epochs) and scored by the validation MSE. For the Random Forest we
+searched the number of trees, the maximum depth, the minimum number of samples
+per leaf and per split, and the feature-subsampling rule, scoring trials by the
+validation \Rsq{}. The best configuration of each model (Table~\ref{tab:hyperparams})
+was then fixed for all subsequent experiments; the spatial-loss weight $\lpear$
+was tuned separately (Section~\ref{subsec:res_lambda}) on top of the chosen
+ResUNet++ backbone, and the final models were retrained for 50 epochs (see
+below).
+
+\begin{table}[t]
+  \centering
+  \caption{Hyperparameter search spaces (Optuna, TPE sampler) and selected
+  configurations. The CNN search minimised the validation MSE over up to 150
+  epochs with median pruning; the Random Forest search maximised the validation
+  \Rsq{}.}
+  \label{tab:hyperparams}
+  \small
+  \begin{tabular}{lccc}
+    \toprule
+    \multicolumn{4}{l}{\textit{CNNs (U-Net and ResUNet++)}}\\
+    Hyperparameter & Search space & U-Net & ResUNet++ \\
+    \midrule
+    Base width        & $\{32, 48, 64\}$                      & $48$ & $64$ \\
+    Optimiser         & $\{$Adam, AdamW$\}$                   & Adam & AdamW \\
+    Learning rate     & $[3{\times}10^{-5},\,5{\times}10^{-4}]$ (log) & $3.06{\times}10^{-5}$ & $1.29{\times}10^{-4}$ \\
+    Weight decay      & $[5{\times}10^{-6},\,6{\times}10^{-4}]$ (log) & $2.15{\times}10^{-5}$ & $1.24{\times}10^{-4}$ \\
+    Dropout           & $[0,\,0.20]$                          & $0.001$ & $0.077$ \\
+    Batch size        & $\{8, 16\}$                           & $16$ & $8$ \\
+    Gradient clipping & $\{0,\,1.0\}$                         & $1.0$ & $1.0$ \\
+    \midrule
+    \multicolumn{2}{l}{\textit{Random Forest}} & \multicolumn{2}{c}{Selected} \\
+    \midrule
+    No.\ of trees      & $\{100, 200, 300, 500\}$            & \multicolumn{2}{c}{$300$} \\
+    Max.\ depth        & $\{10, 15, 20, 30, \text{None}\}$   & \multicolumn{2}{c}{$15$} \\
+    Min.\ samples leaf & $\{1, 5, 10, 20\}$                  & \multicolumn{2}{c}{$1$} \\
+    Max.\ features     & $\{$sqrt, log2, $0.3$, $0.5\}$      & \multicolumn{2}{c}{log2} \\
+    Min.\ samples split& $\{2, 5, 10\}$                      & \multicolumn{2}{c}{$2$} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Training.}
+All CNN models are trained for 50 epochs without early stopping and without
+data augmentation, to keep the comparison controlled and reproducible. Every
+model is evaluated at the checkpoint with the lowest validation loss
+(best-validation epoch), applying the same selection rule to all architectures
+for a fair comparison.
+
+\paragraph{Reproducibility and seeds.}
+Every CNN experiment is repeated with three random seeds (42, 123, 7), with the
+seed fixed immediately before model construction. We report the mean and
+standard deviation across seeds for all metrics; the seed spread is an
+essential part of our results, as it reveals stability differences that
+single-run numbers would mask. The RF, being almost deterministic for this
+problem, is likewise evaluated over the three seeds for consistency.
+
+\paragraph{Experiments.}
+Four experiments are reported in Section~\ref{sec:results}:
+(i) a head-to-head comparison of RF, U-Net and ResUNet++ on the 22-channel
+dataset;
+(ii) a sweep of the spatial-loss weight $\lpear\in\{0,0.1,0.25,0.4,0.5,0.6,
+0.75,1.0\}$ for ResUNet++ (eight values $\times$ three seeds);
+(iii) a leave-one-group-out ablation of the predictor families (six
+configurations $\times$ three seeds); and
+(iv) an analysis of the 26-channel meteorological configuration.
