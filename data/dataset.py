@@ -33,6 +33,43 @@ class SnowDataset(Dataset):
         'sx_max':      90.0,   # Angulo maximo teorico del horizonte
     }
 
+    # Normalizacion v3: constantes empiricas derivadas del TRAIN set (split
+    # temporal, 4241 tiles, solo pixeles validos). Ver
+    # scripts/compute_norm_v3_stats.py y results/norm_v3/norm_v3_stats.json.
+    # Motivacion: tpi_max=9200 y dem_std=1000 de NORM estan calibradas sobre
+    # artefactos nodata y aplastan la senal real (TPI real ~[-5,+5] m a 1m,
+    # ~[-15,+15] m a 5m; std real del DEM ~130 m). Ademas el remuestreo del
+    # DEM 5m genera valores intermedios entre -9999 y el terreno real que
+    # pasan el filtro ==-9999; los umbrales *_valid los detectan y esos
+    # pixeles se neutralizan a 0 tras normalizar (mismo convenio que nodata).
+    NORM_V3 = {
+        'dem_mean':      2015.0,   # media train TEMPORAL (rango cuenca 1712-2312)
+        'dem_std':        130.0,   # std train temporal
+        'dem_min_valid': 1700.0,   # por debajo = artefacto de remuestreo
+        'tpi1_scale':       5.0,   # |p99.5| del TPI 1m
+        'tpi1_max_valid':  50.0,   # |TPI 1m| mayor = artefacto
+        'tpi5_scale':      15.0,   # grueso del TPI 5m
+        'tpi5_max_valid': 100.0,   # |TPI 5m| mayor = artefacto
+        'clip':             3.0,   # saturacion (winsorizing) de extremos reales
+    }
+
+    # Constantes para el SPLIT ESPACIAL: derivadas del train ESPACIAL, no del
+    # temporal. Las bandas espaciales cubren un rango de elevacion mas estrecho
+    # (DEM std 106 vs 134). Usar las constantes temporales aqui seria una fuga:
+    # se calcularon sobre tiles que incluyen la banda de test espacial. TPI es
+    # robusto entre splits, solo cambian mean/std del DEM. Ver
+    # scripts/compute_norm_v3_stats.py --split spatial.
+    NORM_V3_SPATIAL = {
+        'dem_mean':      1945.0,   # media train ESPACIAL
+        'dem_std':        106.0,   # std train espacial
+        'dem_min_valid': 1700.0,
+        'tpi1_scale':       5.0,
+        'tpi1_max_valid':  50.0,
+        'tpi5_scale':      15.0,
+        'tpi5_max_valid': 100.0,
+        'clip':             3.0,
+    }
+
     def __init__(self, dataframe: pd.DataFrame, images_dir: str,
                  masks_dir: str, use_sce: bool = False,
                  augment: bool = False, n_channels: int = None):
@@ -69,6 +106,19 @@ class SnowDataset(Dataset):
         # Se fija desde main.py via config data.norm_extended (default True).
         self.norm_extended = True     # se puede sobreescribir desde main.py
 
+        # Version de normalizacion. None = comportamiento legacy gobernado por
+        # norm_extended ('vieja'/'nueva'). 'v3' = normalizacion empirica con
+        # exclusion de artefactos (ver NORM_V3). Se fija desde main.py via
+        # config data.norm_version.
+        self.norm_version = None      # se puede sobreescribir desde main.py
+
+        # Si True, __getitem__ devuelve (image, mask, valid) donde valid marca
+        # los pixeles del target con dato LiDAR real (los NaN de la mascara son
+        # nodata; _clean los convierte a 0 y sin este flag la loss los veria
+        # como "0 m de nieve" reales). Lo activa main.py via
+        # config training.masked_loss. Default False = 2-tupla legacy.
+        self.return_valid = False     # se puede sobreescribir desde main.py
+
     def __len__(self):
         return len(self.df)
 
@@ -82,8 +132,16 @@ class SnowDataset(Dataset):
             mask  = np.load(msk_path).astype(np.float32)
         except Exception as e:
             print(f"Error cargando {tile_id}: {e}")
+            if self.return_valid:
+                return (torch.zeros((self.n_channels, 256, 256)),
+                        torch.zeros((1, 256, 256)),
+                        torch.zeros((1, 256, 256)))
             return (torch.zeros((self.n_channels, 256, 256)),
                     torch.zeros((1, 256, 256)))
+
+        # Validez del target ANTES de _clean (que destruye la marca de nodata
+        # convirtiendo NaN -> 0). NaN = fuera de la huella LiDAR.
+        valid = (np.isfinite(mask) & (mask > -100)).astype(np.float32)
 
         image, mask = self._clean(image, mask)
         image = self._normalize(image)
@@ -93,8 +151,12 @@ class SnowDataset(Dataset):
             image = image[:self.n_channels, :, :]
 
         if self.augment:
-            image, mask = self._augment(image, mask)
+            image, mask, valid = self._augment(image, mask, valid)
 
+        if self.return_valid:
+            return (torch.from_numpy(image.copy()),
+                    torch.from_numpy(mask.copy()).unsqueeze(0),
+                    torch.from_numpy(valid.copy()).unsqueeze(0))
         return torch.from_numpy(image.copy()), torch.from_numpy(mask.copy()).unsqueeze(0)
 
     # ------------------------------------------------------------------
@@ -105,9 +167,18 @@ class SnowDataset(Dataset):
         image = np.nan_to_num(image, nan=0.0, posinf=0.0, neginf=0.0)
         mask[mask <= -100] = 0
         mask = np.nan_to_num(mask, nan=0.0, posinf=0.0, neginf=0.0)
+        # Profundidad de nieve negativa es fisicamente imposible: el ruido
+        # LiDAR pequeno (~[-0.1, 0)) se recorta a 0 (suelo desnudo). La mascara
+        # de validez ya se calculo antes de _clean, asi que estos pixeles
+        # siguen siendo validos y entran a la loss como 0 m (correcto).
+        mask = np.maximum(mask, 0.0)
         return image, mask
 
     def _normalize(self, image: np.ndarray) -> np.ndarray:
+        if self.norm_version in ('v3', 'v3_spatial'):
+            const = (self.NORM_V3_SPATIAL if self.norm_version == 'v3_spatial'
+                     else self.NORM_V3)
+            return self._normalize_v3(image, const)
         n = image.shape[0]  # usar tamano real, no self.n_channels
 
         # Canales base (presentes en todos los datasets)
@@ -161,8 +232,88 @@ class SnowDataset(Dataset):
 
         return image
 
+    def _normalize_v3(self, image: np.ndarray, const: dict = None) -> np.ndarray:
+        """Normalizacion v3: constantes empiricas del train set (NORM_V3 para
+        el split temporal, NORM_V3_SPATIAL para el espacial) y exclusion de
+        artefactos de remuestreo.
+
+        Para DEM y TPI (1m y 5m): los pixeles fuera del rango fisico plausible
+        (sangrado de nodata en el remuestreo) se detectan ANTES de escalar y se
+        neutralizan a 0 DESPUES de escalar, igual que el resto de nodata. Los
+        valores validos se escalan con constantes empiricas y los extremos
+        reales raros se saturan a +-clip (winsorizing).
+        NOTA: _clean ya convirtio los -9999 exactos en 0; esos pixeles quedan
+        dentro de los umbrales de plausibilidad del TPI (0 es plausible) y su
+        valor escalado sigue siendo 0, que es el convenio de "sin informacion".
+        """
+        V = const if const is not None else self.NORM_V3
+        n = image.shape[0]
+        clip = V['clip']
+
+        def _dem(ch):
+            invalid = ch < V['dem_min_valid']
+            out = np.clip((ch - V['dem_mean']) / V['dem_std'], -clip, clip)
+            out[invalid] = 0.0
+            return out
+
+        def _tpi(ch, scale, max_valid):
+            invalid = np.abs(ch) > max_valid
+            out = np.clip(ch / scale, -clip, clip)
+            out[invalid] = 0.0
+            return out
+
+        # Topografia 1m
+        image[0] = _dem(image[0])
+        image[1] = image[1] / self.NORM['slope_max']
+        # 2 (northness) y 3 (eastness) ya en [-1, 1]
+        image[4] = _tpi(image[4], V['tpi1_scale'], V['tpi1_max_valid'])
+
+        # Canal 5 (SCE): codigos 0/10/11 -> binario [0, 1]
+        if n >= 6:
+            image[5] = (image[5] > 5).astype(np.float32)
+
+        # Canales 6-13 (Sx): angulos de horizonte en grados -> [-1, 1].
+        # ~0.34% de pixeles traen -FLT_MAX (artefacto de calculo); el clip de
+        # las normas legacy los disfrazaba de -1 ("exposicion maxima"). Aqui
+        # se detectan (|Sx|>90 es fisicamente imposible) y se neutralizan a 0.
+        if n >= 14:
+            sx = image[6:14]
+            invalid_sx = np.abs(sx) > self.NORM['sx_max']
+            sx = np.clip(sx / self.NORM['sx_max'], -1.0, 1.0)
+            sx[invalid_sx] = 0.0
+            image[6:14] = sx
+
+        # Canales 14-16 (persistencia nival): ya en [0, 1]
+
+        # Topografia 5m
+        if n >= 22:
+            image[17] = _dem(image[17])
+            image[18] = image[18] / self.NORM['slope_max']
+            # 19 (northness_5m) y 20 (eastness_5m) ya en [-1, 1]
+            image[21] = _tpi(image[21], V['tpi5_scale'], V['tpi5_max_valid'])
+
+        # Canales meteo (22+): mismos escalados que la norm extendida
+        if n >= 26:
+            image[22] = image[22] / 10.0
+            image[23] = image[23] / 10.0
+            image[24] = image[24] / 10.0
+            image[25] = image[25] / 1000.0
+        if n >= 35:
+            image[26] = image[26] / 10.0
+            image[27] = image[27] / 10.0
+            image[28] = image[28] / 10.0
+            image[29] = image[29] / 100.0
+            image[30] = image[30] / 100.0
+            image[31] = image[31] / 100.0
+            image[32] = image[32] / 600.0
+            image[33] = image[33] / 600.0
+            image[34] = image[34] / 600.0
+
+        return image
+
     def _augment(self, image: np.ndarray,
-                 mask: np.ndarray) -> tuple:
+                 mask: np.ndarray,
+                 valid: np.ndarray = None) -> tuple:
         """
         Aplica flips aleatorios en tiempo real.
 
@@ -185,20 +336,29 @@ class SnowDataset(Dataset):
         if flip_h:
             image = np.flip(image, axis=2)   # invertir W
             mask  = np.flip(mask,  axis=1)
+            if valid is not None:
+                valid = np.flip(valid, axis=1)
             image[3] = -image[3]             # Eastness -> negar
 
         if flip_v:
             image = np.flip(image, axis=1)   # invertir H
             mask  = np.flip(mask,  axis=0)
+            if valid is not None:
+                valid = np.flip(valid, axis=0)
             image[2] = -image[2]             # Northness -> negar
 
-        return image, mask
+        return image, mask, valid
 
 
 class SnowDatasetEval(SnowDataset):
     """
     Igual que SnowDataset pero devuelve tambien el tile_id,
     necesario para el bucle de evaluacion.
+
+    Si return_valid=True devuelve (image, mask, valid, tile_id): valid marca
+    los pixeles con dato LiDAR real (no nodata), lo que permite calcular
+    metricas full-domain (incluyendo suelo desnudo) y de deteccion, ademas de
+    las snow-only. Si False (legacy) devuelve (image, mask, tile_id).
     """
 
     def __getitem__(self, idx):
@@ -211,9 +371,15 @@ class SnowDatasetEval(SnowDataset):
             mask  = np.load(msk_path).astype(np.float32)
         except Exception as e:
             print(f"Error cargando {tile_id}: {e}")
+            if self.return_valid:
+                return (torch.zeros((self.n_channels, 256, 256)),
+                        torch.zeros((1, 256, 256)),
+                        torch.zeros((1, 256, 256)), tile_id)
             return (torch.zeros((self.n_channels, 256, 256)),
-                    torch.zeros((1, 256, 256)),
-                    tile_id)
+                    torch.zeros((1, 256, 256)), tile_id)
+
+        # Validez del target ANTES de _clean (nodata = NaN)
+        valid = (np.isfinite(mask) & (mask > -100)).astype(np.float32)
 
         image, mask = self._clean(image, mask)
         image = self._normalize(image)
@@ -222,6 +388,9 @@ class SnowDatasetEval(SnowDataset):
         else:
             image = image[:self.n_channels, :, :]
 
+        if self.return_valid:
+            return (torch.from_numpy(image), torch.from_numpy(mask).unsqueeze(0),
+                    torch.from_numpy(valid).unsqueeze(0), tile_id)
         return torch.from_numpy(image), torch.from_numpy(mask).unsqueeze(0), tile_id
 
 

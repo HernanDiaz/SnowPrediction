@@ -9,7 +9,7 @@ def compute_spaef(obs: np.ndarray, sim: np.ndarray, n_bins: int = 100) -> float:
     Mide la similitud espacial entre dos campos considerando:
         rho   = correlacion de Pearson (patron espacial)
         alpha = ratio de CV  (CV_sim / CV_obs)
-        beta  = interseccion de histogramas normalizados
+        beta  = interseccion de histogramas de los campos Z-ESTANDARIZADOS
 
     SPAEF = 1 - sqrt((rho-1)^2 + (alpha-1)^2 + (beta-1)^2)
 
@@ -50,14 +50,25 @@ def compute_spaef(obs: np.ndarray, sim: np.ndarray, n_bins: int = 100) -> float:
         return float('nan')
     alpha = cv_sim / cv_obs
 
-    # beta: interseccion de histogramas normalizados
-    lo = min(float(obs.min()), float(sim.min()))
-    hi = max(float(obs.max()), float(sim.max()))
+    # beta: interseccion de histogramas de los campos Z-ESTANDARIZADOS.
+    # Definicion canonica (Koch et al. 2018): el histograma se calcula sobre
+    # (x - mean)/std de cada campo, de modo que mide la FORMA de la
+    # distribucion; la localizacion y la escala ya las penalizan rho y alpha.
+    # (Antes se histogramaban valores crudos -> el termino duplicaba el error
+    # de escala y no era comparable con la literatura.)
+    std_obs = float(np.std(obs))
+    std_sim = float(np.std(sim))
+    if std_obs == 0.0 or std_sim == 0.0:
+        return float('nan')
+    oz = (obs - mean_obs) / std_obs
+    sz = (sim - mean_sim) / std_sim
+    lo = min(float(oz.min()), float(sz.min()))
+    hi = max(float(oz.max()), float(sz.max()))
     if hi <= lo:
         return float('nan')
     bins = np.linspace(lo, hi, n_bins + 1)
-    h_obs, _ = np.histogram(obs, bins=bins)
-    h_sim, _ = np.histogram(sim, bins=bins)
+    h_obs, _ = np.histogram(oz, bins=bins)
+    h_sim, _ = np.histogram(sz, bins=bins)
     h_obs = h_obs / (h_obs.sum() + 1e-10)
     h_sim = h_sim / (h_sim.sum() + 1e-10)
     beta = float(np.sum(np.minimum(h_obs, h_sim)))
@@ -156,6 +167,42 @@ def compute_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
         'R2':   round(r2,   4),
         'NSE':  round(nse,  4),
         'Bias': round(bias, 4),
+    }
+
+
+def compute_detection_metrics(y_true: np.ndarray, y_pred: np.ndarray,
+                              thr: float = 0.01) -> dict:
+    """Metricas de deteccion nieve/no-nieve sobre pixeles validos.
+
+    Complementa la evaluacion "snow-only" (que solo mira target>thr y por tanto
+    es CIEGA a los falsos positivos: nieve predicha sobre suelo desnudo real).
+    Aqui se clasifica cada pixel valido como nieve (>thr) o no, y se reportan
+    precision, recall y F1 para la clase "nieve", mas la tasa de falsos
+    positivos. y_true/y_pred deben ser 1D sobre TODOS los pixeles validos
+    (incluyendo suelo desnudo).
+    """
+    t = np.asarray(y_true) > thr
+    p = np.asarray(y_pred) > thr
+    tp = int(np.sum(t & p))
+    fp = int(np.sum(~t & p))
+    fn = int(np.sum(t & ~p))
+    tn = int(np.sum(~t & ~p))
+    prec = tp / (tp + fp) if (tp + fp) else float('nan')
+    rec  = tp / (tp + fn) if (tp + fn) else float('nan')
+    # F1 = 0 si precision o recall son 0 (no NaN); NaN solo si alguno es
+    # indefinido (division 0/0 arriba).
+    if np.isnan(prec) or np.isnan(rec):
+        f1 = float('nan')
+    elif (prec + rec) == 0.0:
+        f1 = 0.0
+    else:
+        f1 = 2 * prec * rec / (prec + rec)
+    fpr  = fp / (fp + tn) if (fp + tn) else float('nan')  # tasa de falsa alarma
+    return {
+        'snow_precision': round(float(prec), 4) if not np.isnan(prec) else float('nan'),
+        'snow_recall':    round(float(rec), 4) if not np.isnan(rec) else float('nan'),
+        'snow_f1':        round(float(f1), 4) if not np.isnan(f1) else float('nan'),
+        'false_pos_rate': round(float(fpr), 4) if not np.isnan(fpr) else float('nan'),
     }
 
 

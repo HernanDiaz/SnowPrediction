@@ -95,14 +95,20 @@ def run_train(config: dict):
                            use_sce=use_sce, augment=use_aug,
                            n_channels=n_channels)
     norm_extended = cfg_data.get('norm_extended', True)
+    norm_version  = cfg_data.get('norm_version', None)
+    masked_loss   = cfg_tr.get('masked_loss', False)
     train_ds.augment_mode   = aug_mode
     train_ds.channel_indices = channel_indices
     train_ds.norm_extended   = norm_extended
+    train_ds.norm_version    = norm_version
+    train_ds.return_valid    = masked_loss
     val_ds   = SnowDataset(val_df,   imgs_dir, masks_dir,
                            use_sce=use_sce, augment=False,
                            n_channels=n_channels)
     val_ds.channel_indices   = channel_indices
     val_ds.norm_extended     = norm_extended
+    val_ds.norm_version      = norm_version
+    val_ds.return_valid      = masked_loss
 
     train_loader = DataLoader(
         train_ds,
@@ -154,6 +160,10 @@ def run_evaluate(config: dict):
                               n_channels=n_channels)
     test_ds.channel_indices = channel_indices
     test_ds.norm_extended   = cfg_data.get('norm_extended', True)
+    test_ds.norm_version    = cfg_data.get('norm_version', None)
+    # Devolver la mascara de validez para calcular metricas full-domain y de
+    # deteccion (falsos positivos) ademas de las snow-only.
+    test_ds.return_valid    = True
     test_loader = DataLoader(
         test_ds,
         batch_size=cfg_tr['batch_size'],

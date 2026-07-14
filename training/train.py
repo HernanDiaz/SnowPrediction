@@ -42,8 +42,48 @@ class SpatialMSELoss(nn.Module):
         super().__init__()
         self.lambda_pearson = lambda_pearson
 
-    def forward(self, pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
-        # pred, target: (B, 1, H, W)
+    MIN_VALID_PX = 10   # minimo de pixeles validos por tile para el termino Pearson
+
+    def forward(self, pred: torch.Tensor, target: torch.Tensor,
+                valid: torch.Tensor = None) -> torch.Tensor:
+        # pred, target, valid: (B, 1, H, W). valid es opcional (1=pixel con
+        # dato LiDAR real). Sin valid -> comportamiento legacy (sin mascara).
+        if valid is None:
+            return self._forward_unmasked(pred, target)
+
+        B = pred.shape[0]
+        p = pred.view(B, -1)     # (B, H*W)
+        t = target.view(B, -1)
+        v = valid.view(B, -1)
+
+        # MSE solo sobre pixeles validos (media global del batch)
+        sq_err = (p - t) ** 2
+        mse = (sq_err * v).sum() / v.sum().clamp(min=1.0)
+
+        if self.lambda_pearson == 0.0:
+            return mse
+
+        # Pearson por tile sobre pixeles validos; tiles con muy pocos pixeles
+        # validos no aportan al termino (peso 0).
+        n = v.sum(dim=1)                                   # (B,)
+        n_safe = n.clamp(min=1.0)
+        p_mean = (p * v).sum(dim=1, keepdim=True) / n_safe.unsqueeze(1)
+        t_mean = (t * v).sum(dim=1, keepdim=True) / n_safe.unsqueeze(1)
+        p_c = (p - p_mean) * v
+        t_c = (t - t_mean) * v
+
+        num   = (p_c * t_c).sum(dim=1)
+        denom = torch.sqrt((p_c ** 2).sum(dim=1) * (t_c ** 2).sum(dim=1) + 1e-8)
+        rho   = num / denom                                # (B,) en [-1, 1]
+
+        w = (n >= self.MIN_VALID_PX).float()
+        pearson_loss = ((1.0 - rho) * w).sum() / w.sum().clamp(min=1.0)
+        return mse + self.lambda_pearson * pearson_loss
+
+    def _forward_unmasked(self, pred: torch.Tensor,
+                          target: torch.Tensor) -> torch.Tensor:
+        # Comportamiento original (sin mascara): reproduce los experimentos
+        # antiguos, donde los nodata del target entran como 0.
         mse = F.mse_loss(pred, target)
 
         if self.lambda_pearson == 0.0:
@@ -99,14 +139,26 @@ def get_device(device_str: str) -> torch.device:
 # Bucles de una epoca
 # ----------------------------------------------------------------------
 
+def _unpack_batch(batch, device):
+    """Batch de 2 elementos (legacy) o 3 (con mascara de validez)."""
+    if len(batch) == 3:
+        images, masks, valid = batch
+        return images.to(device), masks.to(device), valid.to(device)
+    images, masks = batch
+    return images.to(device), masks.to(device), None
+
+
 def _train_epoch(model, loader, optimizer, criterion, device, grad_clip=0.0) -> float:
     model.train()
     total = 0.0
     pbar  = tqdm(loader, desc="  Train", leave=False)
-    for images, masks in pbar:
-        images, masks = images.to(device), masks.to(device)
+    for batch in pbar:
+        images, masks, valid = _unpack_batch(batch, device)
         optimizer.zero_grad()
-        loss = criterion(model(images), masks)
+        if valid is not None:
+            loss = criterion(model(images), masks, valid)
+        else:
+            loss = criterion(model(images), masks)
         loss.backward()
         if grad_clip > 0:
             torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
@@ -120,9 +172,12 @@ def _val_epoch(model, loader, criterion, device) -> float:
     model.eval()
     total = 0.0
     with torch.no_grad():
-        for images, masks in tqdm(loader, desc="  Val  ", leave=False):
-            images, masks = images.to(device), masks.to(device)
-            total += criterion(model(images), masks).item()
+        for batch in tqdm(loader, desc="  Val  ", leave=False):
+            images, masks, valid = _unpack_batch(batch, device)
+            if valid is not None:
+                total += criterion(model(images), masks, valid).item()
+            else:
+                total += criterion(model(images), masks).item()
     return total / len(loader)
 
 
@@ -168,6 +223,10 @@ def train_model(model:        nn.Module,
 
     huber_delta     = cfg_tr.get('huber_delta', 0.5)
     lambda_pearson  = cfg_tr.get('lambda_pearson', 0.5)
+    masked_loss     = cfg_tr.get('masked_loss', False)
+    if masked_loss and cfg_tr['loss'] != 'spatial_mse':
+        raise ValueError("masked_loss=true requiere loss 'spatial_mse' "
+                         "(las demas losses no aceptan mascara de validez).")
     criterion       = get_loss_fn(cfg_tr['loss'],
                                   huber_delta=huber_delta,
                                   lambda_pearson=lambda_pearson)
@@ -230,7 +289,8 @@ def train_model(model:        nn.Module,
     print(f"\nExperimento : {exp}")
     print(f"Loss        : {cfg_tr['loss'].upper()}"
           + (f" (delta={huber_delta})" if cfg_tr['loss'] == 'huber' else "")
-          + (f" (lambda_pearson={lambda_pearson})" if cfg_tr['loss'] == 'spatial_mse' else ""))
+          + (f" (lambda_pearson={lambda_pearson})" if cfg_tr['loss'] == 'spatial_mse' else "")
+          + ("  [MASKED: solo pixeles con dato LiDAR]" if masked_loss else ""))
     print(f"Optimizer   : {opt_name.upper()}"
           + (f"  |  GradClip: {grad_clip}" if grad_clip > 0 else "")
           + (f"  |  SWA desde ep{swa_start} (lr={swa_lr:.1e})" if swa_enabled else ""))

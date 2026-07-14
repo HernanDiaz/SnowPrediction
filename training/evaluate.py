@@ -7,7 +7,9 @@ import pandas as pd
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from utils.metrics import compute_metrics, compute_naive_benchmark, compute_spaef, compute_mspaef, print_metrics
+from utils.metrics import (compute_metrics, compute_naive_benchmark,
+                           compute_spaef, compute_mspaef,
+                           compute_detection_metrics, print_metrics)
 from utils.visualization import plot_scatter, plot_predictions
 
 
@@ -78,16 +80,25 @@ def evaluate_model(model:       torch.nn.Module,
         print(f"\nEvaluando: {exp} ...")
 
     model.eval()
+    # snow-only (target > 1cm): metricas principales, comparables con el paper
     all_preds, all_targets = [], []
+    # full-domain (todos los pixeles validos, incl. suelo desnudo): mide
+    # tambien los falsos positivos que la evaluacion snow-only no ve
+    all_preds_full, all_targets_full = [], []
     spaef_per_tile  = []
     mspaef_per_tile = []
+    tiles_dropped = 0   # NaN en SPAEF o MSPAEF (tiles degenerados)
+    tiles_small   = 0   # < 10 pixeles con nieve
     s_imgs, s_masks, s_preds, s_ids = [], [], [], []
 
     with torch.no_grad():
         for batch in tqdm(test_loader, desc="  Test"):
 
-            # El dataloader puede devolver 2 o 3 elementos
-            if len(batch) == 3:
+            # 2/3 elementos (legacy) o 4 (con mascara de validez)
+            valids = None
+            if len(batch) == 4:
+                images, masks, valids, ids = batch
+            elif len(batch) == 3:
                 images, masks, ids = batch
             else:
                 images, masks = batch
@@ -98,6 +109,7 @@ def evaluate_model(model:       torch.nn.Module,
             else:
                 outputs = model(images.to(device)).cpu().numpy()  # (B,1,H,W)
             targets = masks.cpu().numpy()                          # (B,1,H,W)
+            valids_np = valids.cpu().numpy() if valids is not None else None
 
             # Guardar ejemplos para visualizacion (maximo 3 tiles)
             if len(s_imgs) < 3:
@@ -106,47 +118,73 @@ def evaluate_model(model:       torch.nn.Module,
                 s_preds.append(outputs)
                 s_ids.extend(list(ids)[:3 - len(s_ids)])
 
-            # Aplanar y filtrar pixeles con nieve real (> 0.01 m)
             tgt_flat = targets.squeeze(1).flatten()
             out_flat = outputs.squeeze(1).flatten()
-            valid    = tgt_flat > 0.01
 
-            if valid.sum() > 0:
-                all_preds.extend(out_flat[valid].tolist())
-                all_targets.extend(tgt_flat[valid].tolist())
+            # snow-only: pixeles con nieve real (> 0.01 m)
+            snow = tgt_flat > 0.01
+            if snow.sum() > 0:
+                all_preds.extend(out_flat[snow].tolist())
+                all_targets.extend(tgt_flat[snow].tolist())
 
-            # SPAEF y MSPAEF por tile (sobre pixeles validos de cada tile individual)
+            # full-domain: todos los pixeles con dato LiDAR (incl. suelo desnudo)
+            if valids_np is not None:
+                vflat = valids_np.squeeze(1).flatten() > 0.5
+                if vflat.sum() > 0:
+                    all_preds_full.extend(out_flat[vflat].tolist())
+                    all_targets_full.extend(tgt_flat[vflat].tolist())
+
+            # SPAEF y MSPAEF por tile (sobre pixeles con nieve de cada tile);
+            # solo se cuentan si AMBOS son validos -> mismo conjunto de tiles
             for b in range(targets.shape[0]):
                 tgt_tile = targets[b, 0].flatten()
                 out_tile = outputs[b, 0].flatten()
                 v = tgt_tile > 0.01
-                if v.sum() >= 10:
-                    spaef_val = compute_spaef(tgt_tile[v], out_tile[v])
-                    if not np.isnan(spaef_val):
-                        spaef_per_tile.append(spaef_val)
-                    mspaef_val = compute_mspaef(tgt_tile[v], out_tile[v])
-                    if not np.isnan(mspaef_val):
-                        mspaef_per_tile.append(mspaef_val)
+                if v.sum() < 10:
+                    tiles_small += 1
+                    continue
+                spaef_val = compute_spaef(tgt_tile[v], out_tile[v])
+                mspaef_val = compute_mspaef(tgt_tile[v], out_tile[v])
+                if np.isnan(spaef_val) or np.isnan(mspaef_val):
+                    tiles_dropped += 1
+                    continue
+                spaef_per_tile.append(spaef_val)
+                mspaef_per_tile.append(mspaef_val)
 
     y_pred = np.array(all_preds)
     y_true = np.array(all_targets)
 
     metrics = compute_metrics(y_true, y_pred)
 
-    # Anadir SPAEF y MSPAEF medios al diccionario de metricas
+    # SPAEF y MSPAEF sobre el MISMO conjunto de tiles; std con ddof=1
+    # (consistente con la std entre seeds del paper) y conteo de descartes.
+    def _std1(x):
+        return float(np.std(x, ddof=1)) if len(x) > 1 else 0.0
+
     if spaef_per_tile:
-        metrics['SPAEF']        = round(float(np.mean(spaef_per_tile)), 4)
-        metrics['SPAEF_std']    = round(float(np.std(spaef_per_tile)),  4)
+        metrics['SPAEF']         = round(float(np.mean(spaef_per_tile)), 4)
+        metrics['SPAEF_std']     = round(_std1(spaef_per_tile), 4)
+        metrics['MSPAEF']        = round(float(np.mean(mspaef_per_tile)), 4)
+        metrics['MSPAEF_std']    = round(_std1(mspaef_per_tile), 4)
         metrics['SPAEF_n_tiles'] = len(spaef_per_tile)
+        metrics['MSPAEF_n_tiles'] = len(mspaef_per_tile)  # mismo conjunto
+        metrics['tiles_dropped_nan'] = tiles_dropped
+        metrics['tiles_too_small']   = tiles_small
     else:
         metrics['SPAEF'] = float('nan')
-
-    if mspaef_per_tile:
-        metrics['MSPAEF']        = round(float(np.mean(mspaef_per_tile)), 4)
-        metrics['MSPAEF_std']    = round(float(np.std(mspaef_per_tile)),  4)
-        metrics['MSPAEF_n_tiles'] = len(mspaef_per_tile)
-    else:
         metrics['MSPAEF'] = float('nan')
+
+    # full-domain + deteccion (solo si el dataset aporto la mascara de validez)
+    if all_targets_full:
+        yf_true = np.array(all_targets_full)
+        yf_pred = np.array(all_preds_full)
+        mfull = compute_metrics(yf_true, yf_pred)
+        metrics['R2_full']   = mfull['R2']
+        metrics['MAE_full']  = mfull['MAE']
+        metrics['RMSE_full'] = mfull['RMSE']
+        metrics['Bias_full'] = mfull['Bias']
+        metrics.update(compute_detection_metrics(yf_true, yf_pred, thr=0.01))
+        metrics['n_pixels_full'] = int(len(yf_true))
 
     print_metrics(metrics, title=f"Test Set - {exp}")
 
